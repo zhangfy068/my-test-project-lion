@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (C) 2013 XXXX XXXXXXXXXX.
+ * All rights, including trade secret rights, reserved.
+ *
+ */
+ -->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/general_list_item_padding_left"
+        android:paddingRight="@dimen/general_list_item_padding_right"
+        android:scrollbarStyle="outsideOverlay"
+        />
+
+    <!-- Here is the view to show if the list is emtpy -->
+    <TextView
+        android:id="@+id/emptyText"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal|top"
+        android:paddingTop="@dimen/general_empty_txt_top_padding"
+        style="?android:attr/textAppearanceMedium"
+        android:visibility="gone" />
+
+</LinearLayout>

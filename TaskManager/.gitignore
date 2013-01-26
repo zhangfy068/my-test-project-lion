@@ -1,0 +1,4 @@
+#ingore these fils
+.DS_Store
+bin/*
+gen/*

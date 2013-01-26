@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+/*
+ * Copyright (C) 2013 XXXX XXXXXXXXXX.
+ * All rights, including trade secret rights, reserved.
+ *
+ */
+ -->
+
+<resources>
+
+    <style name="AppTheme" parent="android:Theme.Light" />
+
+</resources>

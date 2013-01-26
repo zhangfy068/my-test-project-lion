@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+/*
+ * Copyright (C) 2013 XXXX XXXXXXXXXX.
+ * All rights, including trade secret rights, reserved.
+ *
+ */
+ -->
+<resources>
+
+    <string name="app_name">任务管理器</string>
+    <string name="menu_settings">设定</string>
+    <string name="title_activity_taskmanager">任务管理器</string>
+    <string name="refreshing_dialog_message">正在刷新进程信息.</string>
+    <string name="refreshing_dialog_title">请稍等</string>
+    <string name="string_refresh_btn_txt">刷新</string>
+    <string name="string_memory_status">内存占用状态</string>
+    <string name="string_cpu_status">CPU使用状态</string>
+
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (C) 2013 XXX XXXXXX.
+ * All rights, including trade secret rights, reserved.
+ */
+-->
+<resources>
+
+    <dimen name="general_list_item_padding_left">8dp</dimen>
+    <dimen name="general_list_item_padding_right">8dp</dimen>
+    <dimen name="general_list_item_padding_top">4dp</dimen>
+    <dimen name="general_empty_txt_top_padding">40dp</dimen>
+
+</resources>

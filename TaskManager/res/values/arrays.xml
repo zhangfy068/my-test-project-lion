@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (C) 2013 XXXX XXXXXXXXXX.
+ * All rights, including trade secret rights, reserved.
+ *
+ */
+-->
+<resources>
+
+    <string-array name="snipper_filter_arrays">
+        <item>@string/string_memory_status</item>
+        <item>@string/string_cpu_status</item>
+    </string-array>
+
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (C) 2013 XXXX XXXXXXXXXX.
+ * All rights, including trade secret rights, reserved.
+ *
+ */
+ -->
+<resources>
+
+    <string name="app_name">TaskManager</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_taskmanager">Taskmanager</string>
+    <string name="refreshing_dialog_message">Refreshing process information.</string>
+    <string name="refreshing_dialog_title">Please wait</string>
+    <string name="string_refresh_btn_txt">Refresh</string>
+    <string name="string_memory_status">memory status</string>
+    <string name="string_cpu_status">CPU status</string>
+</resources>
