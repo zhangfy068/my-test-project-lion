@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2011 The Android Open Source Project
-     Copyright (C) 2012 Sony Mobile Communications AB.
+     Copyright (C) 2013 The NewTech LTD. CORP
      Modifications are licensed under the License.
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:columnCount="3"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
     android:paddingBottom="8dip"
-    android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
-    android:paddingRight="?android:attr/listPreferredItemPaddingRight"
     android:paddingTop="8dip" >
 
     <ImageView
@@ -38,7 +34,6 @@
                 android:id="@+id/app_title"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="fill_horizontal"
                 android:ellipsize="marquee"
                 android:singleLine="true"
                 android:gravity="left"
@@ -51,17 +46,17 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="8dip"
                 android:layout_weight="1"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:textAppearance="?android:attr/textAppearanceSmall" 
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/app_summary"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="fill_horizontal"
                 android:layout_marginTop="4dip"
                 android:gravity="right"
-                android:maxLines="2"
-                android:layout_weight="1"
+                android:singleLine="true"
+                android:layout_weight="2"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
         </LinearLayout>
 

@@ -4,8 +4,10 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="12"
+        android:minSdkVersion="9"
         android:targetSdkVersion="15" />
+
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -13,10 +15,11 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".TaskmanagerActivity"
-            android:label="@string/title_activity_taskmanager" >
+            android:label="@string/title_activity_taskmanager"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -15,13 +15,18 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
@@ -32,287 +37,410 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class TaskmanagerActivity extends ListActivity implements View.OnClickListener,
-        OnItemClickListener {
+public class TaskmanagerActivity extends ListActivity implements
+		View.OnClickListener, OnItemClickListener,
+		View.OnCreateContextMenuListener {
 
-    private static final String TAG = "TaskmanagerActivity";
+	private static final String TAG = "TaskmanagerActivity";
 
-    private AppItemAdapter mAdapter;
+	private static final int CONTEXT_MENU_KILL = 0;
 
-    private int mMaxMemory = 0;
+	private static final int CONTEXT_MENU_SWICHTO = 1;
 
-    private View mHeadView;
+	private static final int USER_PROCESS_ID = 10000;
 
-    private ProgressDialog mProgressDlg;
+	private AppItemAdapter mAdapter;
 
-    private ListView mListView;
+	private int mMaxMemory = 0;
 
-    private ArrayAdapter mSpinnerAdapter;
+	private View mHeadView;
 
-    private List<ProcessInfo> mAppList;
+	private ProgressDialog mProgressDlg;
 
-    private Spinner mSpinner;
+	private ListView mListView;
 
-    private Button mRefreshButton;
+	private ArrayAdapter mSpinnerAdapter;
 
-    private ActivityManager mAm;
+	private List<ProcessInfo> mAppList;
 
-    private PackageManager mPm;
+	private Spinner mSpinner;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.task_manager);
-        mListView = getListView();
-        mListView.setOnItemClickListener(this);
+	private Button mRefreshButton;
 
-        LayoutInflater inflater = (LayoutInflater)this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	private ActivityManager mAm;
 
-        mAm = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
+	private PackageManager mPm;
 
-        mPm = getApplicationContext().getPackageManager();
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.task_manager);
+		mListView = getListView();
+		mListView.setOnItemClickListener(this);
 
-        mHeadView = inflater.inflate(R.layout.header_view, null);
-        mListView.addHeaderView(mHeadView);
-        mSpinner = (Spinner)mHeadView.findViewById(R.id.spinner_filter);
-        mRefreshButton = (Button)mHeadView.findViewById(R.id.refresh_btn);
+//		LayoutInflater inflater = (LayoutInflater) this
+//				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        mRefreshButton.setOnClickListener(this);
-        mSpinnerAdapter = ArrayAdapter.createFromResource(this, R.array.snipper_filter_arrays,
-                android.R.layout.simple_spinner_dropdown_item);
-        mSpinner.setAdapter(mSpinnerAdapter);
-        initProcess();
-    }
+		mAm = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 
-    @Override
-    public void onDestroy() {
-        if (mProgressDlg != null) {
-            mProgressDlg.dismiss();
-            mProgressDlg = null;
-        }
-        if (mAdapter != null) {
-            mAdapter = null;
-        }
-        super.onDestroy();
-    }
+		mPm = getApplicationContext().getPackageManager();
+		mHeadView = this.findViewById(R.id.header_view);
+		// mHeadView = inflater.inflate(R.layout.header_view, null);
+		// mListView.addHeaderView(mHeadView);
+		mSpinner = (Spinner) this.findViewById(R.id.spinner_filter);
+		mRefreshButton = (Button) this.findViewById(R.id.refresh_btn);
 
-    private void initProcess() {
-        LoadProcossTask task = new LoadProcossTask();
-        task.execute();
-    }
+		mRefreshButton.setOnClickListener(this);
+		mSpinnerAdapter = ArrayAdapter.createFromResource(this,
+				R.array.snipper_filter_arrays,
+				android.R.layout.simple_spinner_dropdown_item);
+		mSpinner.setAdapter(mSpinnerAdapter);
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.task_manager, menu);
-        return true;
-    }
+		registerForContextMenu(getListView());
 
-    public List<ProcessInfo> getRunningProcess() {
-        PackagesInfo packageInfo = new PackagesInfo(this);
-        mMaxMemory = 0;
-        List<RunningAppProcessInfo> run = mAm.getRunningAppProcesses();
-        PackageManager pm = this.getPackageManager();
-        List<ProcessInfo> list = new ArrayList<ProcessInfo>();
-        for (RunningAppProcessInfo runningInfo : run) {
-            if (runningInfo.processName.equals("system")
-                    || runningInfo.processName.equals("com.android.phone")) {
-                continue;
-            }
+		initProcess();
+	}
 
-            ProcessInfo processInfo = new ProcessInfo();
-            ApplicationInfo info = packageInfo.getInfo(runningInfo.processName);
-            int pid = runningInfo.pid;
-            if (info != null) {
-                Drawable draw = info.loadIcon(pm);
-                if (draw != null) {
-                    processInfo.icon = draw;
-                    processInfo.name = info.loadLabel(pm).toString();
-                    processInfo.Uid = runningInfo.uid;
-                    processInfo.importance = runningInfo.importance;
-                    processInfo.pid = pid;
-                    processInfo.packagename = runningInfo.processName;
-                    MemoryInfo[] meminfo = mAm.getProcessMemoryInfo(new int[] {
-                        pid
-                    });
-                    MemoryInfo pInfo = meminfo[0];
-                    int memoryInKB = pInfo.getTotalPss();
-                    if (mMaxMemory < memoryInKB) {
-                        mMaxMemory = memoryInKB;
-                    }
-                    processInfo.memory = memoryInKB;
-                    Log.i(TAG, info.loadLabel(pm).toString() + " UID: " + processInfo.Uid
-                            + "  Importance: " + processInfo.importance + " Process name: "
-                            + runningInfo.processName);
-                    list.add(processInfo);
-                }
-            }
-        }
-        return list;
-    }
+	@Override
+	public void onDestroy() {
+		if (mProgressDlg != null) {
+			mProgressDlg.dismiss();
+			mProgressDlg = null;
+		}
+		if (mAdapter != null) {
+			mAdapter = null;
+		}
+		super.onDestroy();
+	}
 
-    class AppItemAdapter extends BaseAdapter {
+	private void initProcess() {
+		LoadProcossTask task = new LoadProcossTask();
+		task.execute();
+	}
 
-        private Context mContext;
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.task_manager, menu);
+		return true;
+	}
 
-        public AppItemAdapter(List<ProcessInfo> list, Context context) {
-            mAppList = list;
-            mContext = context;
-        }
+	@Override
+	public void onCreateContextMenu(final ContextMenu aMenu, final View aView,
+			final ContextMenuInfo aMenuInfo) {
+		AdapterView.AdapterContextMenuInfo info;
+		try {
+			info = (AdapterView.AdapterContextMenuInfo) aMenuInfo;
+		} catch (ClassCastException e) {
+			return;
+		}
+		ProcessInfo processInfo = mAppList.get(info.position);
+		aMenu.setHeaderIcon(processInfo.icon);
+		aMenu.setHeaderTitle(processInfo.name);
+		aMenu.add(Menu.NONE, CONTEXT_MENU_KILL, 0,
+				R.string.string_context_menu_kill_txt);
+		MenuItem switchMenu = aMenu.add(Menu.NONE, CONTEXT_MENU_SWICHTO, 0,
+				R.string.string_context_menu_switchto);
 
-        public int getCount() {
-            return mAppList.size();
-        }
+		Intent intent = mPm.getLaunchIntentForPackage(processInfo.packagename);
+		if (intent == null) {
+			switchMenu.setEnabled(false);
+		}
+	}
 
-        public Object getItem(int position) {
-            return mAppList.get(position);
-        }
+	@Override
+	public boolean onContextItemSelected(final MenuItem aItem) {
+		AdapterView.AdapterContextMenuInfo info;
+		try {
+			info = (AdapterView.AdapterContextMenuInfo) aItem.getMenuInfo();
+		} catch (ClassCastException e) {
+			return false;
+		}
 
-        public long getItemId(int position) {
-            return position;
-        }
+		int pos = info.position;
+		ProcessInfo processInfo = mAppList.get(pos);
 
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView == null) {
-                LayoutInflater inflater = LayoutInflater.from(mContext);
+		switch (aItem.getItemId()) {
+		case CONTEXT_MENU_KILL:
+			mAm.killBackgroundProcesses(processInfo.packagename);
+			if (mAdapter != null) {
+				mAppList.remove(pos);
+				sort(mAppList);
+				mMaxMemory = mAppList.get(0).memory;
+				mAdapter.notifyDataSetChanged();
+			}
+			return true;
+		case CONTEXT_MENU_SWICHTO:
+			Intent intent = mPm
+					.getLaunchIntentForPackage(processInfo.packagename);
+			if (intent != null) {
+				startActivity(intent);
+			}
+			return true;
+		default:
+			break;
+		}
+		return true;
+	}
 
-                holder = new ViewHolder();
-                convertView = inflater.inflate(R.layout.app_percentage_item, null);
-                holder.mIcon = (ImageView)convertView.findViewById(R.id.app_icon);
-                holder.mProgressBar = (ProgressBar)convertView.findViewById(R.id.app_progress);
-                holder.mTitle = (TextView)convertView.findViewById(R.id.app_title);
-                holder.mSummary = (TextView)convertView.findViewById(R.id.app_summary);
+	public List<ProcessInfo> getRunningProcess() {
+		List<RunningAppProcessInfo> run = mAm.getRunningAppProcesses();
+		PackageManager pm = this.getPackageManager();
+		List<ProcessInfo> list = new ArrayList<ProcessInfo>();
+		for (RunningAppProcessInfo runningInfo : run) {
+			if (runningInfo.processName.equals("system")
+					|| runningInfo.processName.equals("com.android.phone")) {
+				continue;
+			}
+			try {
+				String packageName = runningInfo.processName;
+				ProcessInfo processInfo = new ProcessInfo();
+				PackageInfo packInfo = mPm.getPackageInfo(packageName,
+						PackageManager.GET_ACTIVITIES);
+				ApplicationInfo appInfo = mPm.getApplicationInfo(packageName,
+						PackageManager.GET_ACTIVITIES);
 
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder)convertView.getTag();
-            }
-            ProcessInfo appInfo = (ProcessInfo)mAppList.get(position);
-            holder.mIcon.setImageDrawable(appInfo.icon);
-            holder.mTitle.setText(appInfo.name);
-            holder.mSummary.setText(String.format("%.2f MB", (float)appInfo.memory / 1024));
-            int mem = appInfo.memory;
-            int pos = mem * 100 / mMaxMemory;
-            holder.mProgressBar.setProgress(pos);
-            return convertView;
-        }
+				if (packInfo != null) {
+					int pid = runningInfo.pid;
+					Drawable draw = mPm.getApplicationIcon(packageName);
+					if (draw != null) {
+						processInfo.icon = draw;
+						processInfo.name = appInfo.loadLabel(pm).toString();
+						processInfo.Uid = runningInfo.uid;
+						processInfo.importance = runningInfo.importance;
+						processInfo.pid = pid;
 
-    }
+						//Poor performance here.
+						processInfo.packagename = runningInfo.processName;
+						MemoryInfo[] meminfo = mAm
+								.getProcessMemoryInfo(new int[] { pid });
+						MemoryInfo pInfo = meminfo[0];
+						processInfo.memory = pInfo.getTotalPss();
+						Log.i(TAG, appInfo.loadLabel(pm).toString() + " UID: "
+								+ processInfo.Uid + "  Importance: "
+								+ processInfo.importance + " Process name: "
+								+ runningInfo.processName);
+						// if (processInfo.Uid > USER_PROCESS_ID
+						// && processInfo.importance
+						// > RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE) {
+						list.add(processInfo);
+					}
+				}
+			} catch (NameNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		return list;
+	}
 
-    static private class ViewHolder {
-        ImageView mIcon;
+	class AppItemAdapter extends BaseAdapter {
 
-        TextView mTitle;
+		private Context mContext;
 
-        TextView mSummary;
+		public AppItemAdapter(List<ProcessInfo> list, Context context) {
+			mAppList = list;
+			mContext = context;
+		}
 
-        ProgressBar mProgressBar;
-    }
+		public int getCount() {
+			return mAppList.size();
+		}
 
-    public class PackagesInfo {
-        private List<ApplicationInfo> appList;
+		public Object getItem(int position) {
+			return mAppList.get(position);
+		}
 
-        public PackagesInfo(Context context) {
-            appList = mPm.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES);
-        }
+		public long getItemId(int position) {
+			return position;
+		}
 
-        public ApplicationInfo getInfo(String name) {
-            if (name == null) {
-                return null;
-            }
-            for (ApplicationInfo appinfo : appList) {
-                if (name.equals(appinfo.processName)) {
-                    return appinfo;
-                }
-            }
-            return null;
-        }
+		public View getView(int position, View convertView, ViewGroup parent) {
+			ViewHolder holder;
+			if (convertView == null) {
+				LayoutInflater inflater = LayoutInflater.from(mContext);
 
-    }
+				holder = new ViewHolder();
+				convertView = inflater.inflate(R.layout.app_percentage_item,
+						null);
+				holder.mIcon = (ImageView) convertView
+						.findViewById(R.id.app_icon);
+				holder.mProgressBar = (ProgressBar) convertView
+						.findViewById(R.id.app_progress);
+				holder.mTitle = (TextView) convertView
+						.findViewById(R.id.app_title);
+				holder.mSummary = (TextView) convertView
+						.findViewById(R.id.app_summary);
 
-    public static class ProcessInfo implements Comparator {
-        private int Uid;
+				convertView.setTag(holder);
+			} else {
+				holder = (ViewHolder) convertView.getTag();
+			}
+			ProcessInfo appInfo = (ProcessInfo) mAppList.get(position);
+			holder.mIcon.setImageDrawable(appInfo.icon);
+			holder.mTitle.setText(appInfo.name);
+			holder.mSummary.setText(String.format("%.2f MB",
+					(float) appInfo.memory / 1024));
+			int mem = appInfo.memory;
+			int pos = mem * 100 / mMaxMemory;
+			holder.mProgressBar.setProgress(pos);
+			return convertView;
+		}
 
-        private int pid;
+	}
 
-        private Drawable icon;
+	@SuppressWarnings("unchecked")
+	private static void sort(List<ProcessInfo> list) {
+		Collections.sort(list, new ProcessInfo());
+	}
 
-        private String name;
+	static private class ViewHolder {
+		ImageView mIcon;
 
-        private String packagename;
+		TextView mTitle;
 
-        private int memory;
+		TextView mSummary;
 
-        private int importance;
+		ProgressBar mProgressBar;
+	}
 
-        @Override
-        public int compare(Object arg0, Object arg1) {
-            if (arg0 instanceof ProcessInfo && arg1 instanceof ProcessInfo) {
-                ProcessInfo info0 = (ProcessInfo)arg0;
-                ProcessInfo info1 = (ProcessInfo)arg1;
-                if (info0.memory > info1.memory) {
-                    return -1;
-                } else if (info0.memory < info1.memory) {
-                    return 1;
-                }
-            }
-            return 0;
-        }
-    }
+//	public class PackagesInfo {
+//		private List<ApplicationInfo> appList;
+//
+//		public PackagesInfo(Context context) {
+//			appList = mPm
+//					.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES);
+//		}
+//
+//		public ApplicationInfo getInfo(String name) {
+//			if (name == null) {
+//				return null;
+//			}
+//			for (ApplicationInfo appinfo : appList) {
+//				if (name.equals(appinfo.processName)) {
+//					return appinfo;
+//				}
+//			}
+//			return null;
+//		}
+//
+//	}
 
-    public class LoadProcossTask extends AsyncTask<Void, Void, List<ProcessInfo>> {
+	public static class ProcessInfo implements Comparator {
+		private int Uid;
 
-        @SuppressWarnings("unchecked")
-        @Override
-        protected List<ProcessInfo> doInBackground(Void... params) {
-            List<ProcessInfo> list = getRunningProcess();
-            Comparator com = new ProcessInfo();
-            Collections.sort(list, com);
-            return list;
-        }
+		private int pid;
 
-        @Override
-        protected void onPostExecute(List<ProcessInfo> list) {
-            mAdapter = new AppItemAdapter(list, TaskmanagerActivity.this);
-            setListAdapter(mAdapter);
-            if (mProgressDlg != null) {
-                mProgressDlg.dismiss();
-            }
-        }
+		private Drawable icon;
 
-        protected void onPreExecute() {
-            mProgressDlg = new ProgressDialog(TaskmanagerActivity.this);
-            mProgressDlg.setMessage(getResources().getString(R.string.refreshing_dialog_message));
-            mProgressDlg.setTitle(R.string.refreshing_dialog_title);
-            mProgressDlg.show();
-        }
-    }
+		private String name;
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.refresh_btn:
-                LoadProcossTask task = new LoadProcossTask();
-                task.execute();
-                break;
-        }
-    }
+		private String packagename;
 
-    @Override
-    public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
-        if (view != null) {
-            ProcessInfo info = mAppList.get(position - 1);
-            Intent intent = mPm.getLaunchIntentForPackage(info.packagename);
-            if (intent != null) {
-                startActivity(intent);
-            }
-        }
-    }
+		private int memory;
+
+		private int importance;
+
+		@Override
+		public int compare(Object arg0, Object arg1) {
+			if (arg0 instanceof ProcessInfo && arg1 instanceof ProcessInfo) {
+				ProcessInfo info0 = (ProcessInfo) arg0;
+				ProcessInfo info1 = (ProcessInfo) arg1;
+				if (info0.memory > info1.memory) {
+					return -1;
+				} else if (info0.memory < info1.memory) {
+					return 1;
+				}
+			}
+			return 0;
+		}
+	}
+
+	public class LoadProcossTask extends
+			AsyncTask<Void, Void, List<ProcessInfo>> {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected List<ProcessInfo> doInBackground(Void... params) {
+			List<ProcessInfo> list = getRunningProcess();
+			sort(list);
+			mMaxMemory = list.get(0).memory;
+			return list;
+		}
+
+		@Override
+		protected void onPostExecute(List<ProcessInfo> list) {
+			mAdapter = new AppItemAdapter(list, TaskmanagerActivity.this);
+			setListAdapter(mAdapter);
+			mHeadView.setVisibility(View.VISIBLE);
+			if (mProgressDlg != null) {
+				mProgressDlg.dismiss();
+			}
+		}
+
+		protected void onPreExecute() {
+			mProgressDlg = new ProgressDialog(TaskmanagerActivity.this);
+			mProgressDlg.setMessage(getResources().getString(
+					R.string.refreshing_dialog_message));
+			mProgressDlg.setTitle(R.string.refreshing_dialog_title);
+			mProgressDlg.show();
+		}
+	}
+
+	public class RefreshTask extends AsyncTask<Void, Void, Void> {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected Void doInBackground(Void... params) {
+			mAppList = getRunningProcess();
+			sort(mAppList);
+			mMaxMemory = mAppList.get(0).memory;
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			if (mAdapter != null) {
+				mAdapter.notifyDataSetChanged();
+			}
+			mRefreshButton.setEnabled(true);
+			Toast.makeText(TaskmanagerActivity.this,
+					R.string.string_refresh_complete_txt, Toast.LENGTH_SHORT)
+					.show();
+		}
+
+		protected void onPreExecute() {
+			mRefreshButton.setEnabled(false);
+			Toast.makeText(TaskmanagerActivity.this,
+					R.string.string_start_refresh_txt, Toast.LENGTH_SHORT)
+					.show();
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.refresh_btn:
+			RefreshTask task = new RefreshTask();
+			task.execute();
+			break;
+		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View view, int position,
+			long id) {
+		// if (view != null) {
+		// ProcessInfo info = mAppList.get(position - 1);
+		// Intent intent = mPm.getLaunchIntentForPackage(info.packagename);
+		// if (intent != null) {
+		// startActivity(intent);
+		// }
+		// }
+	}
 }

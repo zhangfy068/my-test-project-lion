@@ -5,30 +5,60 @@
  * All rights, including trade secret rights, reserved.
  *
  */
- -->
+-->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/header_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/general_list_item_padding_top"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <Button
+            android:id="@+id/refresh_btn"
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/general_list_item_padding_left"
+            android:layout_weight="1"
+            android:text="@string/string_refresh_btn_txt" />
+
+        <Spinner
+            android:id="@+id/spinner_filter"
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/general_list_item_padding_left"
+            android:layout_weight="2" />
+
+        <TextView
+            android:id="@+id/memory_info"
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/general_list_item_padding_left"
         android:paddingRight="@dimen/general_list_item_padding_right"
-        android:scrollbarStyle="outsideOverlay"
-        />
+        android:scrollbarStyle="outsideOverlay" />
 
     <!-- Here is the view to show if the list is emtpy -->
+
     <TextView
         android:id="@+id/emptyText"
+        style="?android:attr/textAppearanceMedium"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal|top"
         android:paddingTop="@dimen/general_empty_txt_top_padding"
-        style="?android:attr/textAppearanceMedium"
         android:visibility="gone" />
 
 </LinearLayout>
