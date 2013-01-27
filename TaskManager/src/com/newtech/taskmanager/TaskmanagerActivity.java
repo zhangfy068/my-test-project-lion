@@ -47,9 +47,8 @@ import java.util.List;
 public class TaskmanagerActivity extends ListActivity implements
 		View.OnClickListener, OnItemClickListener,
 		View.OnCreateContextMenuListener {
-
 	private static final String TAG = "TaskmanagerActivity";
-
+	
 	private static final int CONTEXT_MENU_KILL = 0;
 
 	private static final int CONTEXT_MENU_SWICHTO = 1;
@@ -77,6 +76,8 @@ public class TaskmanagerActivity extends ListActivity implements
 	private ActivityManager mAm;
 
 	private PackageManager mPm;
+	
+	private SwipeDismissListViewTouchListener mTouchListener;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -85,8 +86,22 @@ public class TaskmanagerActivity extends ListActivity implements
 		mListView = getListView();
 		mListView.setOnItemClickListener(this);
 
-//		LayoutInflater inflater = (LayoutInflater) this
-//				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mTouchListener = new SwipeDismissListViewTouchListener(mListView,
+				new SwipeDismissListViewTouchListener.OnDismissCallback() {
+					@Override
+					public void onDismiss(ListView listView,
+							int[] reverseSortedPositions) {
+		                for (int position : reverseSortedPositions) {
+		                	killProcess(position);
+		                }
+					}
+				});
+		mTouchListener.setAllowTag(R.id.app_summary);
+
+		mListView.setOnTouchListener(mTouchListener);
+		mListView.setOnScrollListener(mTouchListener.makeScrollListener());
+		// LayoutInflater inflater = (LayoutInflater) this
+		// .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		mAm = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 
@@ -164,29 +179,40 @@ public class TaskmanagerActivity extends ListActivity implements
 		}
 
 		int pos = info.position;
-		ProcessInfo processInfo = mAppList.get(pos);
 
 		switch (aItem.getItemId()) {
 		case CONTEXT_MENU_KILL:
-			mAm.killBackgroundProcesses(processInfo.packagename);
-			if (mAdapter != null) {
-				mAppList.remove(pos);
-				sort(mAppList);
-				mMaxMemory = mAppList.get(0).memory;
-				mAdapter.notifyDataSetChanged();
-			}
+			killProcess(pos);
 			return true;
 		case CONTEXT_MENU_SWICHTO:
-			Intent intent = mPm
-					.getLaunchIntentForPackage(processInfo.packagename);
-			if (intent != null) {
-				startActivity(intent);
-			}
+			switchToProcess(pos);
 			return true;
 		default:
 			break;
 		}
 		return true;
+	}
+	
+	private void killProcess(int position) {
+		if (mAppList != null) {
+			ProcessInfo processInfo = mAppList.get(position);
+			mAm.killBackgroundProcesses(processInfo.packagename);
+			mAppList.remove(position);
+			sortList(mAppList);
+			if(mAdapter != null) {
+				mAdapter.notifyDataSetChanged();
+			}
+		}
+	}
+
+	private void switchToProcess(int position) {
+		if (mAppList != null) {
+			Intent intent = mPm.getLaunchIntentForPackage(mAppList
+					.get(position).packagename);
+			if (intent != null) {
+				startActivity(intent);
+			}
+		}
 	}
 
 	public List<ProcessInfo> getRunningProcess() {
@@ -289,14 +315,21 @@ public class TaskmanagerActivity extends ListActivity implements
 			int mem = appInfo.memory;
 			int pos = mem * 100 / mMaxMemory;
 			holder.mProgressBar.setProgress(pos);
+			Boolean isSystem = false;
+			if(appInfo.importance < RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE
+					|| appInfo.Uid < USER_PROCESS_ID) {
+				isSystem = true;
+			}
+			convertView.setTag(R.id.app_summary, isSystem);
 			return convertView;
 		}
 
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void sort(List<ProcessInfo> list) {
+	private void sortList(List<ProcessInfo> list) {
 		Collections.sort(list, new ProcessInfo());
+		mMaxMemory = list.get(0).memory;
 	}
 
 	static private class ViewHolder {
@@ -368,8 +401,7 @@ public class TaskmanagerActivity extends ListActivity implements
 		@Override
 		protected List<ProcessInfo> doInBackground(Void... params) {
 			List<ProcessInfo> list = getRunningProcess();
-			sort(list);
-			mMaxMemory = list.get(0).memory;
+			sortList(list);
 			return list;
 		}
 
@@ -398,8 +430,7 @@ public class TaskmanagerActivity extends ListActivity implements
 		@Override
 		protected Void doInBackground(Void... params) {
 			mAppList = getRunningProcess();
-			sort(mAppList);
-			mMaxMemory = mAppList.get(0).memory;
+			sortList(mAppList);
 			return null;
 		}
 
