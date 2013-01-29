@@ -20,4 +20,6 @@
     <string name="string_refresh_complete_txt">Refresh Complete!</string>
     <string name="string_context_menu_kill_txt">Kill</string>
     <string name="string_context_menu_switchto">Switch To</string>
+    <string name="string_memory_used_txt">Used:</string>
+    <string name="string_memory_avail_txt">Avail:</string>
 </resources>

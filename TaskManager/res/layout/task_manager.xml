@@ -42,6 +42,38 @@
             android:layout_weight="1" />
     </LinearLayout>
 
+    <view class="com.newtech.taskmanager.LinearColorBar"
+            android:id="@+id/color_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:visibility="gone">
+
+         <TextView android:id="@+id/used_memory"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:focusable="false"
+            android:gravity="start|bottom"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#000"
+            android:singleLine="true" />
+         <TextView android:id="@+id/avail_memory"
+            android:layout_gravity="center_vertical|end"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:focusable="false"
+            android:gravity="end|bottom"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#000"
+            android:singleLine="true" />
+    </view>
+
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"

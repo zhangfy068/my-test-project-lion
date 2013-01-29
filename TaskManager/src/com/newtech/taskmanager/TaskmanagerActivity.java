@@ -48,12 +48,14 @@ public class TaskmanagerActivity extends ListActivity implements
 		View.OnClickListener, OnItemClickListener,
 		View.OnCreateContextMenuListener {
 	private static final String TAG = "TaskmanagerActivity";
-	
+
 	private static final int CONTEXT_MENU_KILL = 0;
 
 	private static final int CONTEXT_MENU_SWICHTO = 1;
 
 	private static final int USER_PROCESS_ID = 10000;
+
+	private static final float MB_SIZE = 1024 * 1024;
 
 	private AppItemAdapter mAdapter;
 
@@ -76,8 +78,15 @@ public class TaskmanagerActivity extends ListActivity implements
 	private ActivityManager mAm;
 
 	private PackageManager mPm;
-	
+
 	private SwipeDismissListViewTouchListener mTouchListener;
+
+	private LinearColorBar mColorBar;
+
+	private MemInfoReader mMemInfo;
+
+	private TextView mUsedMemory;
+	private TextView mAvailMemory;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -85,15 +94,19 @@ public class TaskmanagerActivity extends ListActivity implements
 		setContentView(R.layout.task_manager);
 		mListView = getListView();
 		mListView.setOnItemClickListener(this);
+		mMemInfo = new MemInfoReader();
+		mColorBar = (LinearColorBar) findViewById(R.id.color_bar);
+		mUsedMemory = (TextView) findViewById(R.id.used_memory);
+		mAvailMemory = (TextView) findViewById(R.id.avail_memory);
 
 		mTouchListener = new SwipeDismissListViewTouchListener(mListView,
 				new SwipeDismissListViewTouchListener.OnDismissCallback() {
 					@Override
 					public void onDismiss(ListView listView,
 							int[] reverseSortedPositions) {
-		                for (int position : reverseSortedPositions) {
-		                	killProcess(position);
-		                }
+						for (int position : reverseSortedPositions) {
+							killProcess(position);
+						}
 					}
 				});
 		mTouchListener.setAllowTag(R.id.app_summary);
@@ -199,6 +212,7 @@ public class TaskmanagerActivity extends ListActivity implements
 			mAm.killBackgroundProcesses(processInfo.packagename);
 			mAppList.remove(position);
 			sortList(mAppList);
+			setMemBar();
 			if(mAdapter != null) {
 				mAdapter.notifyDataSetChanged();
 			}
@@ -410,6 +424,8 @@ public class TaskmanagerActivity extends ListActivity implements
 			mAdapter = new AppItemAdapter(list, TaskmanagerActivity.this);
 			setListAdapter(mAdapter);
 			mHeadView.setVisibility(View.VISIBLE);
+			mColorBar.setVisibility(View.VISIBLE);
+			setMemBar();
 			if (mProgressDlg != null) {
 				mProgressDlg.dismiss();
 			}
@@ -422,6 +438,32 @@ public class TaskmanagerActivity extends ListActivity implements
 			mProgressDlg.setTitle(R.string.refreshing_dialog_title);
 			mProgressDlg.show();
 		}
+	}
+
+	private void setMemBar() {
+		mMemInfo.readMemInfo();
+		float total = mMemInfo.getTotalSize() / MB_SIZE;
+//		float free = mMemInfo.getFreeSize();
+		android.app.ActivityManager.MemoryInfo mi
+		         = new android.app.ActivityManager.MemoryInfo();
+		mAm.getMemoryInfo(mi);
+		float free = mi.availMem/MB_SIZE;
+		float used = (total - free);
+		Log.i(TAG, "Totol memory is " + free);
+//		Log.i(TAG, "free memeroy is " + free / (1024 * 1024) + "MB");
+		Log.i(TAG, "free memeroy is " + used);
+
+		mColorBar.setRatios(used / total, 0, free / total);
+
+		String usedString = getResources().getString(
+				R.string.string_memory_used_txt)
+				+ String.format("%.2f MB", used);
+
+		String availString = getResources().getString(
+				R.string.string_memory_avail_txt)
+				+ String.format("%.2f MB", free);
+		mUsedMemory.setText(usedString);
+		mAvailMemory.setText(availString);
 	}
 
 	public class RefreshTask extends AsyncTask<Void, Void, Void> {
@@ -440,6 +482,7 @@ public class TaskmanagerActivity extends ListActivity implements
 				mAdapter.notifyDataSetChanged();
 			}
 			mRefreshButton.setEnabled(true);
+			setMemBar();
 			Toast.makeText(TaskmanagerActivity.this,
 					R.string.string_refresh_complete_txt, Toast.LENGTH_SHORT)
 					.show();
