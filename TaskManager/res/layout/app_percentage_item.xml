@@ -36,7 +36,7 @@
                 android:layout_height="match_parent"
                 android:ellipsize="marquee"
                 android:singleLine="true"
-                android:gravity="left"
+                android:gravity="start"
                 android:layout_weight="1"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -54,7 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginTop="4dip"
-                android:gravity="right"
+                android:gravity="end"
                 android:singleLine="true"
                 android:layout_weight="2"
                 android:textAppearance="?android:attr/textAppearanceSmall" />

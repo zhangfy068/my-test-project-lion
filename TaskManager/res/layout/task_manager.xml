@@ -23,7 +23,7 @@
         <Button
             android:id="@+id/refresh_btn"
             android:layout_width="0dip"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginRight="@dimen/general_list_item_padding_left"
             android:layout_weight="1"
             android:text="@string/string_refresh_btn_txt" />
@@ -31,7 +31,7 @@
         <Spinner
             android:id="@+id/spinner_filter"
             android:layout_width="0dip"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginRight="@dimen/general_list_item_padding_left"
             android:layout_weight="2" />
 
@@ -48,6 +48,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:clipChildren="false"
+            android:paddingLeft="@dimen/general_list_item_padding_left"
+            android:paddingRight="@dimen/general_list_item_padding_right"
             android:clipToPadding="false"
             android:paddingTop="1dp"
             android:paddingBottom="1dp"

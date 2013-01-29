@@ -83,10 +83,14 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private LinearColorBar mColorBar;
 
-	private MemInfoReader mMemInfo;
+	private MemInfoReader mMemInfoReader;
 
-	private TextView mUsedMemory;
-	private TextView mAvailMemory;
+	private float mTotalMemory;
+
+	private float mAvailMemory;
+
+	private TextView mUsedMemoryTextView;
+	private TextView mAvailMemTextView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -94,10 +98,12 @@ public class TaskmanagerActivity extends ListActivity implements
 		setContentView(R.layout.task_manager);
 		mListView = getListView();
 		mListView.setOnItemClickListener(this);
-		mMemInfo = new MemInfoReader();
+		mMemInfoReader = new MemInfoReader();
+		mMemInfoReader.readMemInfo();
+		mTotalMemory = mMemInfoReader.getTotalSize() / MB_SIZE;
 		mColorBar = (LinearColorBar) findViewById(R.id.color_bar);
-		mUsedMemory = (TextView) findViewById(R.id.used_memory);
-		mAvailMemory = (TextView) findViewById(R.id.avail_memory);
+		mUsedMemoryTextView = (TextView) findViewById(R.id.used_memory);
+		mAvailMemTextView = (TextView) findViewById(R.id.avail_memory);
 
 		mTouchListener = new SwipeDismissListViewTouchListener(mListView,
 				new SwipeDismissListViewTouchListener.OnDismissCallback() {
@@ -113,8 +119,6 @@ public class TaskmanagerActivity extends ListActivity implements
 
 		mListView.setOnTouchListener(mTouchListener);
 		mListView.setOnScrollListener(mTouchListener.makeScrollListener());
-		// LayoutInflater inflater = (LayoutInflater) this
-		// .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		mAm = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 
@@ -210,8 +214,9 @@ public class TaskmanagerActivity extends ListActivity implements
 		if (mAppList != null) {
 			ProcessInfo processInfo = mAppList.get(position);
 			mAm.killBackgroundProcesses(processInfo.packagename);
-			mAppList.remove(position);
+			ProcessInfo info = mAppList.remove(position);
 			sortList(mAppList);
+			mAvailMemory += (float)info.memory / 1024;
 			setMemBar();
 			if(mAdapter != null) {
 				mAdapter.notifyDataSetChanged();
@@ -425,6 +430,7 @@ public class TaskmanagerActivity extends ListActivity implements
 			setListAdapter(mAdapter);
 			mHeadView.setVisibility(View.VISIBLE);
 			mColorBar.setVisibility(View.VISIBLE);
+			getLastestdFreeMemory();
 			setMemBar();
 			if (mProgressDlg != null) {
 				mProgressDlg.dismiss();
@@ -440,20 +446,19 @@ public class TaskmanagerActivity extends ListActivity implements
 		}
 	}
 
-	private void setMemBar() {
-		mMemInfo.readMemInfo();
-		float total = mMemInfo.getTotalSize() / MB_SIZE;
-//		float free = mMemInfo.getFreeSize();
+	private void getLastestdFreeMemory() {
 		android.app.ActivityManager.MemoryInfo mi
-		         = new android.app.ActivityManager.MemoryInfo();
+		     = new android.app.ActivityManager.MemoryInfo();
 		mAm.getMemoryInfo(mi);
-		float free = mi.availMem/MB_SIZE;
-		float used = (total - free);
-		Log.i(TAG, "Totol memory is " + free);
-//		Log.i(TAG, "free memeroy is " + free / (1024 * 1024) + "MB");
+		mAvailMemory = mi.availMem / MB_SIZE;
+	}
+
+	private void setMemBar() {
+		float used = (mTotalMemory - mAvailMemory);
+		Log.i(TAG, "Totol memory is " + mAvailMemory);
 		Log.i(TAG, "free memeroy is " + used);
 
-		mColorBar.setRatios(used / total, 0, free / total);
+		mColorBar.setRatios(used / mTotalMemory, 0, mAvailMemory / mTotalMemory);
 
 		String usedString = getResources().getString(
 				R.string.string_memory_used_txt)
@@ -461,9 +466,9 @@ public class TaskmanagerActivity extends ListActivity implements
 
 		String availString = getResources().getString(
 				R.string.string_memory_avail_txt)
-				+ String.format("%.2f MB", free);
-		mUsedMemory.setText(usedString);
-		mAvailMemory.setText(availString);
+				+ String.format("%.2f MB", mAvailMemory);
+		mUsedMemoryTextView.setText(usedString);
+		mAvailMemTextView.setText(availString);
 	}
 
 	public class RefreshTask extends AsyncTask<Void, Void, Void> {
@@ -482,6 +487,7 @@ public class TaskmanagerActivity extends ListActivity implements
 				mAdapter.notifyDataSetChanged();
 			}
 			mRefreshButton.setEnabled(true);
+			getLastestdFreeMemory();
 			setMemBar();
 			Toast.makeText(TaskmanagerActivity.this,
 					R.string.string_refresh_complete_txt, Toast.LENGTH_SHORT)
