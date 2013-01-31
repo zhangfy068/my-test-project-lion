@@ -11,6 +11,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
+    <LinearLayout
+            android:id="@+id/loading_process"
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+        <ProgressBar
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:focusable="false" />
+
+        <TextView
+            android:id="@+id/waiting_tips"
+            android:text="@string/refreshing_dialog_title"
+            android:layout_marginTop="@dimen/general_list_item_padding_top"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/header_view"

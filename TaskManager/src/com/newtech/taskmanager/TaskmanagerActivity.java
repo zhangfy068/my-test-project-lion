@@ -11,7 +11,6 @@ import android.os.Debug.MemoryInfo;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -63,8 +62,6 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private View mHeadView;
 
-	private ProgressDialog mProgressDlg;
-
 	private ListView mListView;
 
 	private ArrayAdapter mSpinnerAdapter;
@@ -85,12 +82,16 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private MemInfoReader mMemInfoReader;
 
+	private View mProcessView;
+
 	private float mTotalMemory;
 
 	private float mAvailMemory;
 
 	private TextView mUsedMemoryTextView;
 	private TextView mAvailMemTextView;
+
+	private boolean mOnRefresh;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -128,7 +129,7 @@ public class TaskmanagerActivity extends ListActivity implements
 		// mListView.addHeaderView(mHeadView);
 		mSpinner = (Spinner) this.findViewById(R.id.spinner_filter);
 		mRefreshButton = (Button) this.findViewById(R.id.refresh_btn);
-
+		mProcessView = this.findViewById(R.id.loading_process);
 		mRefreshButton.setOnClickListener(this);
 		mSpinnerAdapter = ArrayAdapter.createFromResource(this,
 				R.array.snipper_filter_arrays,
@@ -136,20 +137,25 @@ public class TaskmanagerActivity extends ListActivity implements
 		mSpinner.setAdapter(mSpinnerAdapter);
 
 		registerForContextMenu(getListView());
-
 		initProcess();
 	}
 
 	@Override
 	public void onDestroy() {
-		if (mProgressDlg != null) {
-			mProgressDlg.dismiss();
-			mProgressDlg = null;
-		}
 		if (mAdapter != null) {
 			mAdapter = null;
 		}
 		super.onDestroy();
+	}
+
+	@Override
+	public void onResume() {
+		//refresh process when resumed.
+		if (!mOnRefresh) {
+			RefreshTask task = new RefreshTask();
+			task.execute();
+		}
+		super.onResume();
 	}
 
 	private void initProcess() {
@@ -243,43 +249,35 @@ public class TaskmanagerActivity extends ListActivity implements
 					|| runningInfo.processName.equals("com.android.phone")) {
 				continue;
 			}
-			try {
-				String packageName = runningInfo.processName;
-				ProcessInfo processInfo = new ProcessInfo();
-				PackageInfo packInfo = mPm.getPackageInfo(packageName,
-						PackageManager.GET_ACTIVITIES);
-				ApplicationInfo appInfo = mPm.getApplicationInfo(packageName,
-						PackageManager.GET_ACTIVITIES);
 
-				if (packInfo != null) {
-					int pid = runningInfo.pid;
-					Drawable draw = mPm.getApplicationIcon(packageName);
-					if (draw != null) {
-						processInfo.icon = draw;
-						processInfo.name = appInfo.loadLabel(pm).toString();
-						processInfo.Uid = runningInfo.uid;
-						processInfo.importance = runningInfo.importance;
-						processInfo.pid = pid;
+			String packageName = runningInfo.processName;
+			ProcessInfo processInfo = new ProcessInfo();
+			PackagesInfo allUsedPackage = new PackagesInfo(this);
+			ApplicationInfo appInfo = allUsedPackage.getInfo(packageName);
+			int pid = runningInfo.pid;
+			if (appInfo != null) {
+				processInfo.icon = appInfo.loadIcon(mPm);
+				processInfo.name = appInfo.loadLabel(pm).toString();
+				processInfo.Uid = runningInfo.uid;
+				processInfo.importance = runningInfo.importance;
+				processInfo.pid = pid;
 
-						//Poor performance here.
-						processInfo.packagename = runningInfo.processName;
-						MemoryInfo[] meminfo = mAm
-								.getProcessMemoryInfo(new int[] { pid });
-						MemoryInfo pInfo = meminfo[0];
-						processInfo.memory = pInfo.getTotalPss();
-						Log.i(TAG, appInfo.loadLabel(pm).toString() + " UID: "
-								+ processInfo.Uid + "  Importance: "
-								+ processInfo.importance + " Process name: "
-								+ runningInfo.processName);
-						// if (processInfo.Uid > USER_PROCESS_ID
-						// && processInfo.importance
-						// > RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE) {
-						list.add(processInfo);
-					}
-				}
-			} catch (NameNotFoundException e) {
-				e.printStackTrace();
+				// Poor performance here.
+				processInfo.packagename = runningInfo.processName;
+				MemoryInfo[] meminfo = mAm
+						.getProcessMemoryInfo(new int[] { pid });
+				MemoryInfo pInfo = meminfo[0];
+				processInfo.memory = pInfo.getTotalPss();
+				Log.i(TAG, appInfo.loadLabel(pm).toString() + " UID: "
+						+ processInfo.Uid + "  Importance: "
+						+ processInfo.importance + " Process name: "
+						+ runningInfo.processName);
+				// if (processInfo.Uid > USER_PROCESS_ID
+				// && processInfo.importance
+				// > RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE) {
+				list.add(processInfo);
 			}
+
 		}
 		return list;
 	}
@@ -361,27 +359,27 @@ public class TaskmanagerActivity extends ListActivity implements
 		ProgressBar mProgressBar;
 	}
 
-//	public class PackagesInfo {
-//		private List<ApplicationInfo> appList;
-//
-//		public PackagesInfo(Context context) {
-//			appList = mPm
-//					.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES);
-//		}
-//
-//		public ApplicationInfo getInfo(String name) {
-//			if (name == null) {
-//				return null;
-//			}
-//			for (ApplicationInfo appinfo : appList) {
-//				if (name.equals(appinfo.processName)) {
-//					return appinfo;
-//				}
-//			}
-//			return null;
-//		}
-//
-//	}
+	public class PackagesInfo {
+		private List<ApplicationInfo> appList;
+
+		public PackagesInfo(Context context) {
+			appList = mPm
+					.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES);
+		}
+
+		public ApplicationInfo getInfo(String name) {
+			if (name == null) {
+				return null;
+			}
+			for (ApplicationInfo appinfo : appList) {
+				if (name.equals(appinfo.processName)) {
+					return appinfo;
+				}
+			}
+			return null;
+		}
+
+	}
 
 	public static class ProcessInfo implements Comparator {
 		private int Uid;
@@ -427,22 +425,17 @@ public class TaskmanagerActivity extends ListActivity implements
 		@Override
 		protected void onPostExecute(List<ProcessInfo> list) {
 			mAdapter = new AppItemAdapter(list, TaskmanagerActivity.this);
+			mProcessView.setVisibility(View.GONE);
 			setListAdapter(mAdapter);
 			mHeadView.setVisibility(View.VISIBLE);
 			mColorBar.setVisibility(View.VISIBLE);
 			getLastestdFreeMemory();
+			mOnRefresh = false;
 			setMemBar();
-			if (mProgressDlg != null) {
-				mProgressDlg.dismiss();
-			}
 		}
 
 		protected void onPreExecute() {
-			mProgressDlg = new ProgressDialog(TaskmanagerActivity.this);
-			mProgressDlg.setMessage(getResources().getString(
-					R.string.refreshing_dialog_message));
-			mProgressDlg.setTitle(R.string.refreshing_dialog_title);
-			mProgressDlg.show();
+			mOnRefresh = true;
 		}
 	}
 
@@ -486,6 +479,7 @@ public class TaskmanagerActivity extends ListActivity implements
 			if (mAdapter != null) {
 				mAdapter.notifyDataSetChanged();
 			}
+			mOnRefresh = false;
 			mRefreshButton.setEnabled(true);
 			getLastestdFreeMemory();
 			setMemBar();
@@ -495,6 +489,7 @@ public class TaskmanagerActivity extends ListActivity implements
 		}
 
 		protected void onPreExecute() {
+			mOnRefresh = true;
 			mRefreshButton.setEnabled(false);
 			Toast.makeText(TaskmanagerActivity.this,
 					R.string.string_start_refresh_txt, Toast.LENGTH_SHORT)
@@ -506,8 +501,10 @@ public class TaskmanagerActivity extends ListActivity implements
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.refresh_btn:
-			RefreshTask task = new RefreshTask();
-			task.execute();
+			if (!mOnRefresh) {
+				RefreshTask task = new RefreshTask();
+				task.execute();
+			}
 			break;
 		}
 	}
