@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.newtech.taskmanager;
+package com.newtech.taskmanager.util;
 import java.io.FileInputStream;
 
 import android.os.StrictMode;
@@ -48,7 +48,8 @@ public class MemInfoReader {
                     && buffer[index] <= '9') {
                     index++;
                 }
-                String str = new String(buffer, 0, start, index-start);
+                @SuppressWarnings("deprecation")
+				String str = new String(buffer, 0, start, index-start);
                 return ((long)Integer.parseInt(str)) * 1024;
             }
             index++;
@@ -58,7 +59,7 @@ public class MemInfoReader {
 
     public void readMemInfo() {
         // Permit disk reads here, as /proc/meminfo isn't really "on
-        // disk" and should be fast.  TODO: make BlockGuard ignore
+        // disk" and should be fast.
         // /proc/ and /sys/ files perhaps?
         StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
         try {

@@ -1,28 +1,13 @@
-// THIS IS A BETA! I DON'T RECOMMEND USING IT IN PRODUCTION CODE JUST YET
-
 /*
- * Copyright 2012 Roman Nurik
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * CopyRight (C) 2013 NewTech CORP LTD.
+ * SwipeDismissListViewTouchListener.java
  */
-
 package com.newtech.taskmanager;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -84,6 +69,7 @@ import java.util.List;
  * @see SwipeDismissTouchListener
  */
 public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
+
 	// Cached ViewConfiguration and system-wide constant values
 	private int mSlop;
 	private int mMinFlingVelocity;
@@ -104,8 +90,8 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 	private int mDownPosition;
 	private View mDownView;
 	private boolean mPaused;
-	private Boolean mNotAllowedSwip;
-	private int mViewTagforAllowSwip;
+	private Boolean mIsForbidSwipe;
+	private int mKeyforTagofForbidSwipe;
 
 	/**
 	 * The callback interface used by {@link SwipeDismissListViewTouchListener}
@@ -190,76 +176,82 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 		}
 
 		switch (motionEvent.getActionMasked()) {
-		    case MotionEvent.ACTION_DOWN: {
-			    if (mPaused) {
-				    return false;
-			    }
+		case MotionEvent.ACTION_DOWN: {
+			if (mPaused) {
+				return false;
+			}
 
-			    // TODO: ensure this is a finger, and set a flag
+			// TODO: ensure this is a finger, and set a flag
 
-    			// Find the child view that was touched (perform a hit test)
-	    		Rect rect = new Rect();
-			    int childCount = mListView.getChildCount();
-			    int[] listViewCoords = new int[2];
-			    mListView.getLocationOnScreen(listViewCoords);
-			    int x = (int) motionEvent.getRawX() - listViewCoords[0];
-			    int y = (int) motionEvent.getRawY() - listViewCoords[1];
-			    View child;
-			    for (int i = 0; i < childCount; i++) {
-				    child = mListView.getChildAt(i);
-				    child.getHitRect(rect);
-				    if (rect.contains(x, y)) {
-			    		mDownView = child;
-				    	break;
-				    }
-			    }
+			// Find the child view that was touched (perform a hit test)
+			Rect rect = new Rect();
+			int childCount = mListView.getChildCount();
+			int[] listViewCoords = new int[2];
+			mListView.getLocationOnScreen(listViewCoords);
+			int x = (int) motionEvent.getRawX() - listViewCoords[0];
+			int y = (int) motionEvent.getRawY() - listViewCoords[1];
+			View child;
+			for (int i = 0; i < childCount; i++) {
+				child = mListView.getChildAt(i);
+				child.getHitRect(rect);
+				if (rect.contains(x, y)) {
+					mDownView = child;
+					break;
+				}
+			}
 
-    			if (mDownView != null) {
-	    			mDownX = motionEvent.getRawX();
-		    		mDownPosition = mListView.getPositionForView(mDownView);
+			if (mDownView != null) {
+				mDownX = motionEvent.getRawX();
+				mDownPosition = mListView.getPositionForView(mDownView);
 
-    				mVelocityTracker = VelocityTracker.obtain();
-	    			mVelocityTracker.addMovement(motionEvent);
+				mVelocityTracker = VelocityTracker.obtain();
+				mVelocityTracker.addMovement(motionEvent);
 
-    				mNotAllowedSwip = (Boolean) mDownView
-	    					.getTag(mViewTagforAllowSwip);
-		    		if (mNotAllowedSwip == null) {
-			    		mNotAllowedSwip = false;
-				    }
-			    }
-			    view.onTouchEvent(motionEvent);
-			    return true;
-		    }
+				mIsForbidSwipe = (Boolean) mDownView
+						.getTag(mKeyforTagofForbidSwipe);
+				if (mIsForbidSwipe == null) {
+					mIsForbidSwipe = false;
+				}
+			}
+			view.onTouchEvent(motionEvent);
+			return true;
+		}
+		/**
+		 * This method is used for fixing the bug: When you are swiping a view
+		 * which doesn't dismiss yet, you rotate the screen at this time. You
+		 * will find the view will not return the original position. So Add
+		 * Action_Cancel Event
+		 */
+		case MotionEvent.ACTION_CANCEL:
+		case MotionEvent.ACTION_UP: {
+			if (mVelocityTracker == null) {
+				break;
+			}
 
-		    case MotionEvent.ACTION_UP: {
-		 	    if (mVelocityTracker == null) {
-			    	break;
-			    }
-
-    			float deltaX = motionEvent.getRawX() - mDownX;
-	    		mVelocityTracker.addMovement(motionEvent);
-		    	mVelocityTracker.computeCurrentVelocity(1000);
-			    float velocityX = Math.abs(mVelocityTracker.getXVelocity());
-			    float velocityY = Math.abs(mVelocityTracker.getYVelocity());
-			    boolean dismiss = false;
-			    boolean dismissRight = false;
-			    if (Math.abs(deltaX) > mViewWidth / 2 && !mNotAllowedSwip) {
-				    dismiss = true;
-				    dismissRight = deltaX > 0;
-			    } else if (mMinFlingVelocity <= velocityX
-				    	&& velocityX <= mMaxFlingVelocity && velocityY < velocityX
-				    	&& !mNotAllowedSwip) {
-				    dismiss = true;
-				    dismissRight = mVelocityTracker.getXVelocity() > 0;
-			    }
-			    if (dismiss) {
-				    // dismiss
-				    final View downView = mDownView; // mDownView gets null'd before
+			float deltaX = motionEvent.getRawX() - mDownX;
+			mVelocityTracker.addMovement(motionEvent);
+			mVelocityTracker.computeCurrentVelocity(1000);
+			float velocityX = Math.abs(mVelocityTracker.getXVelocity());
+			float velocityY = Math.abs(mVelocityTracker.getYVelocity());
+			boolean dismiss = false;
+			boolean dismissRight = false;
+			if (Math.abs(deltaX) > mViewWidth / 2 && !mIsForbidSwipe) {
+				dismiss = true;
+				dismissRight = deltaX > 0;
+			} else if (mMinFlingVelocity <= velocityX
+					&& velocityX <= mMaxFlingVelocity && velocityY < velocityX
+					&& !mIsForbidSwipe) {
+				dismiss = true;
+				dismissRight = mVelocityTracker.getXVelocity() > 0;
+			}
+			if (dismiss) {
+				// dismiss
+				final View downView = mDownView; // mDownView gets null'd before
 													// animation ends
-				    final int downPosition = mDownPosition;
-				    ++mDismissAnimationRefCount;
-				    mDownView.animate()
-				  		.translationX(dismissRight ? mViewWidth : -mViewWidth)
+				final int downPosition = mDownPosition;
+				++mDismissAnimationRefCount;
+				mDownView.animate()
+						.translationX(dismissRight ? mViewWidth : -mViewWidth)
 						.alpha(0).setDuration(mAnimationTime)
 						.setListener(new AnimatorListenerAdapter() {
 							@Override
@@ -267,52 +259,52 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 								performDismiss(downView, downPosition);
 							}
 						});
-			    } else {
-			    	// cancel
-				    mDownView.animate().translationX(0).alpha(1)
+			} else {
+				// cancel
+				mDownView.animate().translationX(0).alpha(1)
 						.setDuration(mAnimationTime).setListener(null);
-		    	}
-		    	mVelocityTracker = null;
-			    mDownX = 0;
-			    mDownView = null;
-			    mDownPosition = ListView.INVALID_POSITION;
-			    mSwiping = false;
-			    break;
-		    }
+			}
+			mVelocityTracker = null;
+			mDownX = 0;
+			mDownView = null;
+			mDownPosition = ListView.INVALID_POSITION;
+			mSwiping = false;
+			break;
+		}
 
-		    case MotionEvent.ACTION_MOVE: {
-		    	if (mVelocityTracker == null || mPaused) {
-			    	break;
-			    }
+		case MotionEvent.ACTION_MOVE: {
+			if (mVelocityTracker == null || mPaused) {
+				break;
+			}
 
-    			mVelocityTracker.addMovement(motionEvent);
-	    		float deltaX = motionEvent.getRawX() - mDownX;
-		    	if (Math.abs(deltaX) > mSlop) {
-			    	mSwiping = true;
-			    	mListView.requestDisallowInterceptTouchEvent(true);
+			mVelocityTracker.addMovement(motionEvent);
+			float deltaX = motionEvent.getRawX() - mDownX;
+			if (Math.abs(deltaX) > mSlop) {
+				mSwiping = true;
+				mListView.requestDisallowInterceptTouchEvent(true);
 
-    				// Cancel ListView's touch (un-highlighting the item)
-	    			MotionEvent cancelEvent = MotionEvent.obtain(motionEvent);
-		    		cancelEvent
-			    			.setAction(MotionEvent.ACTION_CANCEL
+				// Cancel ListView's touch (un-highlighting the item)
+				MotionEvent cancelEvent = MotionEvent.obtain(motionEvent);
+				cancelEvent
+						.setAction(MotionEvent.ACTION_CANCEL
 								| (motionEvent.getActionIndex() << MotionEvent.ACTION_POINTER_INDEX_SHIFT));
-				    mListView.onTouchEvent(cancelEvent);
-			    }
+				mListView.onTouchEvent(cancelEvent);
+			}
 
-			    if (mSwiping) {
-				    if (mNotAllowedSwip) {
-				    	mDownView.setTranslationX(deltaX / 4);
-    				} else {
-	    				mDownView.setTranslationX(deltaX);
-		    			mDownView.setAlpha(Math.max(
+			if (mSwiping) {
+				if (mIsForbidSwipe) {
+					mDownView.setTranslationX(deltaX / 4);
+				} else {
+					mDownView.setTranslationX(deltaX);
+					mDownView.setAlpha(Math.max(
 							0f,
 							Math.min(1f, 1f - 2f * Math.abs(deltaX)
 									/ mViewWidth)));
-			    	}
-				    return true;
-			    }
-		    	break;
-		    }
+				}
+				return true;
+			}
+			break;
+		}
 		}
 		return false;
 	}
@@ -340,7 +332,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 		// all dismissed list item animations have completed. This triggers
 		// layout on each animation
 		// frame; in the future we may want to do something smarter and more
-		// performant.
+		// performance.
 
 		final ViewGroup.LayoutParams lp = dismissView.getLayoutParams();
 		final int originalHeight = dismissView.getHeight();
@@ -391,7 +383,16 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 		animator.start();
 	}
 
-	public void setAllowTag(int key) {
-		mViewTagforAllowSwip = key;
+	/**
+	 * If you want to forbid a view to swipe/dismiss, please add a false value
+	 * with a tag as the 'keyForTag' when you bind/create the view. If you add
+	 * this tag, it will allow to swipe at default.
+	 *
+	 * @param keyForTag
+	 *            set the key you used in newView/BindView for forbidding the
+	 *            view to swipe.
+	 */
+	public void setKeyForTagofForbidSwip(int keyForTag) {
+		mKeyforTagofForbidSwipe = keyForTag;
 	}
 }

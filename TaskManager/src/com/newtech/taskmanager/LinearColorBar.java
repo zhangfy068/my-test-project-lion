@@ -1,5 +1,6 @@
-/**
- *
+/*
+ * CopyRight (C) 2013 NewTech CORP LTD.
+ * ProcessInfo.java
  */
 package com.newtech.taskmanager;
 
