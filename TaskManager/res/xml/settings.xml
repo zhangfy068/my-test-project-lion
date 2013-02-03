@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <!-- system setting -->
+
+    <PreferenceCategory android:title="@string/settings_system_configure" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="auto_run"
+        android:persistent="true"
+        android:title="@string/settings_auto_run_title"
+        android:summary="@string/settings_auto_run_summary"/>
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="auto_kill"
+        android:persistent="true"
+        android:title="@string/settings_auto_kill_title"
+        android:summary="@string/settings_auto_kill_summary" />
+
+    <!-- view configure -->
+    <PreferenceCategory android:title="@string/settings_operation_configure" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="show_system_process"
+        android:persistent="true"
+        android:title="@string/settings_show_system_switch_title"
+        android:summary="@string/settings_show_system_swith_summary" />
+
+     <SwitchPreference
+        android:defaultValue="true"
+        android:key="swipe_kill_enable"
+        android:persistent="true"
+        android:title="@string/settings_swip_kill_switch_title"
+        android:summary="@string/settings_swip_kill_switch_summary" />
+
+</PreferenceScreen>

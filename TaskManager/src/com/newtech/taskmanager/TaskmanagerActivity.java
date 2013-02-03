@@ -7,11 +7,12 @@ package com.newtech.taskmanager;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.app.ActivityManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.view.ContextMenu;
@@ -33,9 +34,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.newtech.taskmanager.util.Constants;
 import com.newtech.taskmanager.util.TMLog;
 import com.newtech.taskmanager.util.Utils;
 
@@ -48,8 +51,6 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private static final int CONTEXT_MENU_SWICHTO = 1;
 
-	private static final int USER_PROCESS_ID = 10000;
-
 	private AppItemAdapter mAdapter;
 
 	private int mMaxMemory = 0;
@@ -61,6 +62,9 @@ public class TaskmanagerActivity extends ListActivity implements
 	private ArrayAdapter<?> mSpinnerAdapter;
 
 	private List<ProcessInfo> mAppList;
+
+	private List<ProcessInfo> mAppListWithoutSystemProcess;
+	private List<ProcessInfo> mAppListAll;
 
 	private Spinner mSpinner;
 
@@ -86,6 +90,8 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private RunningProcessStatus mRunningStatus;
 
+    private SharedPreferences mPrefs;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -94,6 +100,7 @@ public class TaskmanagerActivity extends ListActivity implements
 		mColorBar = (LinearColorBar) findViewById(R.id.color_bar);
 		mUsedMemoryTextView = (TextView) findViewById(R.id.used_memory);
 		mAvailMemTextView = (TextView) findViewById(R.id.avail_memory);
+		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 		mTouchListener = new SwipeDismissListViewTouchListener(mListView,
 				new SwipeDismissListViewTouchListener.OnDismissCallback() {
@@ -108,8 +115,6 @@ public class TaskmanagerActivity extends ListActivity implements
 		mTouchListener.setKeyForTagofForbidSwip(R.id.app_summary);
 
 		mListView.setOnItemClickListener(this);
-		mListView.setOnTouchListener(mTouchListener);
-		mListView.setOnScrollListener(mTouchListener.makeScrollListener());
 
 		mAm = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 
@@ -125,7 +130,6 @@ public class TaskmanagerActivity extends ListActivity implements
 				R.array.snipper_filter_arrays,
 				android.R.layout.simple_spinner_dropdown_item);
 		mSpinner.setAdapter(mSpinnerAdapter);
-
 		registerForContextMenu(getListView());
 		initProcess();
 	}
@@ -140,14 +144,35 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	@Override
 	public void onResume() {
-		// refresh process when resumed.
-		if (!mOnRefresh) {
-			RefreshTask task = new RefreshTask();
-			task.execute();
-		}
 		super.onResume();
+		// refresh process when resumed.
+//		if (!mOnRefresh) {
+//			RefreshTask task = new RefreshTask();
+//			task.execute();
+		// }
+		if (mPrefs.getBoolean(Constants.SETTINGS_SWIPE_ENABLE, true)) {
+			mListView.setOnTouchListener(mTouchListener);
+			mListView.setOnScrollListener(mTouchListener.makeScrollListener());
+		} else {
+			mListView.setOnTouchListener(null);
+			mListView.setOnScrollListener(null);
+		}
+
+		if (mAdapter != null && mAppListWithoutSystemProcess != null
+				&& mAppListAll != null) {
+			if (isShowSystemProcess()) {
+				mAppList = mAppListAll;
+			} else {
+				mAppList = mAppListWithoutSystemProcess;
+			}
+			mMaxMemory = mAppList.get(0).getMemory();
+			mAdapter.notifyDataSetChanged();
+		}
 	}
 
+	private boolean isShowSystemProcess() {
+		return mPrefs.getBoolean(Constants.SETTINGS_SHOW_SYSTEM_PROCESS, true);
+	}
 	private void initProcess() {
 		mRunningStatus = new RunningProcessStatus(this.getApplicationContext());
 		mTotalMemory = Utils.getTotalMemory();
@@ -207,12 +232,26 @@ public class TaskmanagerActivity extends ListActivity implements
 		return true;
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_settings:
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			intent.setClass(this, SettingsPreferenceActivity.class);
+			startActivity(intent);
+			break;
+
+		}
+		return true;
+	}
+
 	private void killProcess(int position) {
 		if (mAppList != null) {
 			ProcessInfo processInfo = mAppList.get(position);
 			mAm.killBackgroundProcesses(processInfo.getPackageName());
 			ProcessInfo info = mAppList.remove(position);
 			sortList(mAppList);
+			mMaxMemory = mAppList.get(0).getMemory();
 			mAvailMemory += (float) info.getMemory() / 1024;
 			setMemBar();
 			if (mAdapter != null) {
@@ -311,8 +350,7 @@ public class TaskmanagerActivity extends ListActivity implements
 
 		private Context mContext;
 
-		public AppItemAdapter(List<ProcessInfo> list, Context context) {
-			mAppList = list;
+		public AppItemAdapter(Context context) {
 			mContext = context;
 		}
 
@@ -357,15 +395,10 @@ public class TaskmanagerActivity extends ListActivity implements
 			int mem = appInfo.getMemory();
 			int pos = mem * 100 / mMaxMemory;
 			holder.mProgressBar.setProgress(pos);
-			Boolean isSystem = false;
-			if (appInfo.getImportance() < RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE
-					|| appInfo.getUid() < USER_PROCESS_ID) {
-				isSystem = true;
-			}
-			convertView.setTag(R.id.app_summary, isSystem);
+			convertView.setTag(R.id.app_summary,
+					Boolean.valueOf(appInfo.isSystemProcess()));
 			return convertView;
 		}
-
 	}
 
 	@Override
@@ -394,14 +427,12 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private void sortList(List<ProcessInfo> list) {
 		Collections.sort(list, ProcessInfo.getComparator());
-		mMaxMemory = list.get(0).getMemory();
 	}
 
 	private void setMemBar() {
 		float used = (mTotalMemory - mAvailMemory);
 
-		mColorBar
-				.setRatios(used / mTotalMemory, 0, mAvailMemory / mTotalMemory);
+		mColorBar.setRatios(used / mTotalMemory, 0, mAvailMemory / mTotalMemory);
 
 		String usedString = getResources().getString(
 				R.string.string_memory_used_txt)
@@ -431,11 +462,24 @@ public class TaskmanagerActivity extends ListActivity implements
 		protected List<ProcessInfo> doInBackground(Void... params) {
 			List<ProcessInfo> list = mRunningStatus.getRunningApplication();
 			sortList(list);
+			mAppListWithoutSystemProcess = new ArrayList<ProcessInfo>();
+			for (ProcessInfo info : list) {
+				if (!info.isSystemProcess()) {
+					mAppListWithoutSystemProcess.add(info);
+				}
+			}
 			return list;
 		}
 
 		@Override
 		protected void onPostExecute(List<ProcessInfo> list) {
+			mAppListAll = list;
+			if (isShowSystemProcess()) {
+				mAppList = mAppListAll;
+			}else {
+				mAppList = mAppListWithoutSystemProcess;
+			}
+			mMaxMemory = mAppList.get(0).getMemory();
 			mAvailMemory = Utils.getLastestFreeMemory(mAm);
 			mOnRefresh = false;
 			setMemBar();
@@ -450,7 +494,7 @@ public class TaskmanagerActivity extends ListActivity implements
 		@Override
 		protected void onPostExecute(List<ProcessInfo> list) {
 			super.onPostExecute(list);
-			mAdapter = new AppItemAdapter(list, TaskmanagerActivity.this);
+			mAdapter = new AppItemAdapter(TaskmanagerActivity.this);
 			mProcessView.setVisibility(View.GONE);
 			setListAdapter(mAdapter);
 			mHeadView.setVisibility(View.VISIBLE);
@@ -459,17 +503,10 @@ public class TaskmanagerActivity extends ListActivity implements
 	}
 
 	public class RefreshTask extends LoadProcossTask {
-		@Override
-		protected List<ProcessInfo> doInBackground(Void... params) {
-			List<ProcessInfo> list = mRunningStatus.getRunningApplication();
-			sortList(list);
-			return list;
-		}
 
 		@Override
 		protected void onPostExecute(List<ProcessInfo> list) {
 			super.onPostExecute(list);
-			mAppList = list;
 			if (mAdapter != null) {
 				mAdapter.notifyDataSetChanged();
 			}

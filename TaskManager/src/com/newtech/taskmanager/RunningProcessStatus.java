@@ -56,7 +56,7 @@ public class RunningProcessStatus {
 				ProcessInfo processInfo = new ProcessInfo(info.processName);
 				processInfo.setAppInfo(appInfo);
 				processInfo.setRunningInfo(info);
-
+				processInfo.updateBasicInfo(mPm);
 				tmpAppProcesses.put(info.pid, processInfo);
 				runningProcess.add(processInfo);
 			} catch (NameNotFoundException e) {
@@ -73,8 +73,9 @@ public class RunningProcessStatus {
 				processInfo.addService(service);
 			}
 		}
-
+		TMLog.d(TAG, "Memory Check Pointer");
 		// update the Memory Info
+		// Poor performance here, spend about 3-5s to load memory info
 		final int count = runningProcess.size();
 		int[] pids = new int[count];
 		for (int i = 0; i < count; i++) {

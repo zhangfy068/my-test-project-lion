@@ -7,6 +7,8 @@ package com.newtech.taskmanager;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import com.newtech.taskmanager.util.Constants;
+
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Intent;
@@ -29,6 +31,11 @@ public class ProcessInfo implements Comparator<Object> {
 	private String mPackageName;
 
 	private int mMemory;
+
+	//Loading them in updateBasicInfo() to improve the performance
+	private Drawable mIcon;
+	private Intent mIntent;
+	private String mName;
 
 	ProcessInfo(String packageName) {
 		mPackageName = packageName;
@@ -60,11 +67,11 @@ public class ProcessInfo implements Comparator<Object> {
 	}
 
 	public Drawable getIcon(PackageManager pm) {
-		return mAppInfo.loadIcon(pm);
+		return mIcon;
 	}
 
 	public String getName(PackageManager pm) {
-		return mAppInfo.loadLabel(pm).toString();
+		return mName;
 	}
 
 	public int getImportance() {
@@ -87,7 +94,12 @@ public class ProcessInfo implements Comparator<Object> {
 	}
 
 	public boolean isSystemProcess() {
-		return (mAppInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+		// return (mAppInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+		if (getImportance() < RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE
+				|| getUid() < Constants.USER_PROCESS_ID) {
+			return true;
+		}
+		return false;
 	}
 
 	public RunningAppProcessInfo getRunningInfo() {
@@ -121,29 +133,32 @@ public class ProcessInfo implements Comparator<Object> {
 	}
 
 	public Intent getIntent(PackageManager pm) {
-		Intent intent = null;
+		return mIntent;
+	}
+
+	public void updateBasicInfo(PackageManager pm) {
+		mIntent = getIntent(pm);
+		mName = mAppInfo.loadLabel(pm).toString();
+		mIcon = mAppInfo.loadIcon(pm);
 		try {
-			intent = pm.getLaunchIntentForPackage(mPackageName);
-			if (intent != null) {
-				intent = intent.cloneFilter();
-				intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-				return intent;
+			mIntent = pm.getLaunchIntentForPackage(mPackageName);
+			if (mIntent != null) {
+				mIntent = mIntent.cloneFilter();
+				mIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 			}
 			PackageInfo pkginfo = pm.getPackageInfo(mPackageName,
 					PackageManager.GET_ACTIVITIES);
-			if (pkginfo.activities.length == 1) {
-				intent = new Intent(Intent.ACTION_MAIN);
-				intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-				intent.setClassName(pkginfo.packageName,
+			if (pkginfo != null && pkginfo.activities != null
+					&& pkginfo.activities.length == 1) {
+				mIntent = new Intent(Intent.ACTION_MAIN);
+				mIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+				mIntent.setClassName(pkginfo.packageName,
 						pkginfo.activities[0].name);
-				return intent;
 			}
 		} catch (NameNotFoundException e) {
-			return null;
+			mIntent = null;
 		}
-		return null;
 	}
-
 	public static Comparator<Object> getComparator() {
 		if (mInstnceComparator == null) {
 			mInstnceComparator = new ProcessInfo(null);

@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
 /*
  * Copyright (C) 2013 XXXX XXXXXXXXXX.
  * All rights, including trade secret rights, reserved.
  *
  */
- -->
+-->
 <resources>
 
     <string name="app_name">任务管理器</string>
     <string name="menu_settings">设定</string>
     <string name="title_activity_taskmanager">任务管理器</string>
-    <string name="refreshing_dialog_message">正在刷新进程信息.</string>
     <string name="refreshing_dialog_title">请稍等</string>
     <string name="string_refresh_btn_txt">刷新</string>
     <string name="string_memory_status">内存占用状态</string>
@@ -23,4 +21,20 @@
     <string name="string_context_menu_switchto">跳转到此程序</string>
     <string name="string_memory_used_txt">已用内存:</string>
     <string name="string_memory_avail_txt">可用内存:</string>
+
+    <!-- settings strings -->
+    <string name="settings_system_configure">系统设定</string>
+    <string name="settings_auto_run_title">开机自动启动</string>
+    <string name="settings_auto_run_summary">系统将在手机启动后自动运行</string>
+
+    <string name="settings_auto_kill_title">自动关闭后台进程</string>
+    <string name="settings_auto_kill_summary">系统将自动关闭不再使用的后台进程</string>
+
+    <string name="settings_operation_configure">操作和视图</string>
+    <string name="settings_show_system_switch_title">显示系统进程</string>
+    <string name="settings_show_system_swith_summary">将显示所有系统进程</string>
+
+    <string name="settings_swip_kill_switch_title">开启滑动手势</string>
+    <string name="settings_swip_kill_switch_summary">在进程列表中可以通过滑动进程项以关闭进程</string>
+
 </resources>
