@@ -9,8 +9,11 @@ import java.util.Comparator;
 
 import com.newtech.taskmanager.util.Constants;
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -132,12 +135,23 @@ public class ProcessInfo implements Comparator<Object> {
 		return 0;
 	}
 
-	public Intent getIntent(PackageManager pm) {
+	public Intent getIntent() {
 		return mIntent;
 	}
 
+	public void killSelf(Context context) {
+		ActivityManager am = (ActivityManager) context
+				.getSystemService(Activity.ACTIVITY_SERVICE);
+		am.killBackgroundProcesses(mPackageName);
+
+		if (mServiceList != null) {
+			for (RunningServiceInfo service : mServiceList) {
+				context.stopService(new Intent().setComponent(service.service));
+			}
+		}
+	}
+
 	public void updateBasicInfo(PackageManager pm) {
-		mIntent = getIntent(pm);
 		mName = mAppInfo.loadLabel(pm).toString();
 		mIcon = mAppInfo.loadIcon(pm);
 		try {
@@ -159,6 +173,7 @@ public class ProcessInfo implements Comparator<Object> {
 			mIntent = null;
 		}
 	}
+
 	public static Comparator<Object> getComparator() {
 		if (mInstnceComparator == null) {
 			mInstnceComparator = new ProcessInfo(null);

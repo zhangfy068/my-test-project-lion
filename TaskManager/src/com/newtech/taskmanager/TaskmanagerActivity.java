@@ -10,11 +10,15 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.ActivityManager;
 import android.app.ListActivity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.sqlite.SQLiteException;
+import android.text.TextUtils;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,6 +55,8 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private static final int CONTEXT_MENU_SWICHTO = 1;
 
+	private static final int CONTEXT_MENU_IGNORE = 2;
+
 	private AppItemAdapter mAdapter;
 
 	private int mMaxMemory = 0;
@@ -63,6 +69,7 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private List<ProcessInfo> mAppList;
 
+	//two list for withProcess and all process. These two list share object
 	private List<ProcessInfo> mAppListWithoutSystemProcess;
 	private List<ProcessInfo> mAppListAll;
 
@@ -92,10 +99,13 @@ public class TaskmanagerActivity extends ListActivity implements
 
     private SharedPreferences mPrefs;
 
+    private ContentResolver mContentResolver;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.task_manager);
+		mContentResolver = this.getContentResolver();
 		mListView = getListView();
 		mColorBar = (LinearColorBar) findViewById(R.id.color_bar);
 		mUsedMemoryTextView = (TextView) findViewById(R.id.used_memory);
@@ -203,7 +213,8 @@ public class TaskmanagerActivity extends ListActivity implements
 		MenuItem switchMenu = aMenu.add(Menu.NONE, CONTEXT_MENU_SWICHTO, 0,
 				R.string.string_context_menu_switchto);
 
-		if (processInfo.getIntent(mPm) == null) {
+		aMenu.add(Menu.NONE, CONTEXT_MENU_IGNORE, 0, R.string.string_context_menu_ingore);
+		if (processInfo.getIntent() == null) {
 			switchMenu.setEnabled(false);
 		}
 	}
@@ -222,9 +233,12 @@ public class TaskmanagerActivity extends ListActivity implements
 		switch (aItem.getItemId()) {
 		case CONTEXT_MENU_KILL:
 			killProcess(pos);
-			return true;
+			break;
 		case CONTEXT_MENU_SWICHTO:
 			switchToProcess(pos);
+		    break;
+		case CONTEXT_MENU_IGNORE:
+			ignoreProcess(pos);
 			return true;
 		default:
 			break;
@@ -247,16 +261,13 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private void killProcess(int position) {
 		if (mAppList != null) {
-			ProcessInfo processInfo = mAppList.get(position);
-			mAm.killBackgroundProcesses(processInfo.getPackageName());
-			ProcessInfo info = mAppList.remove(position);
+			ProcessInfo info = mAppList.get(position);
+			removeProcessFromLis(info.getPackageName());
+			info.killSelf(this);
 			sortList(mAppList);
 			mMaxMemory = mAppList.get(0).getMemory();
 			mAvailMemory += (float) info.getMemory() / 1024;
 			setMemBar();
-			if (mAdapter != null) {
-				mAdapter.notifyDataSetChanged();
-			}
 
 			TMLog.d(TAG,
 					"Kill process, release memory :"
@@ -264,9 +275,43 @@ public class TaskmanagerActivity extends ListActivity implements
 		}
 	}
 
+	private void ignoreProcess(int pos) {
+		if (mAppList != null) {
+			String name = mAppList.get(pos).getPackageName();
+			ContentValues values = new ContentValues();
+			values.put(Constants.PACKAGE_NAME, name);
+			try {
+				mContentResolver.insert(Constants.IGNORE_LIST_URI, values);
+				removeProcessFromLis(name);
+			} catch (SQLiteException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	//Could not find the better way to do this.
+	private void removeProcessFromLis(String processName) {
+		for(ProcessInfo info : mAppListWithoutSystemProcess) {
+			if(TextUtils.equals(info.getPackageName(), processName)){
+				mAppListWithoutSystemProcess.remove(info);
+				break;
+			}
+		}
+
+		for(ProcessInfo info : mAppListAll) {
+			if(TextUtils.equals(info.getPackageName(), processName)){
+				mAppListAll.remove(info);
+				break;
+			}
+		}
+		if (mAdapter != null) {
+			mAdapter.notifyDataSetChanged();
+		}
+	}
+
 	private void switchToProcess(int position) {
 		if (mAppList != null) {
-			Intent intent = mAppList.get(position).getIntent(mPm);
+			Intent intent = mAppList.get(position).getIntent();
 			if (intent != null) {
 				startActivity(intent);
 			}

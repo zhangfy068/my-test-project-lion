@@ -17,8 +17,12 @@
     <string name="string_cpu_status">CPU使用状态</string>
     <string name="string_start_refresh_txt">开始刷新</string>
     <string name="string_refresh_complete_txt">刷新完成!</string>
+
+    <!-- context menu in main view -->
     <string name="string_context_menu_kill_txt">关闭程序</string>
     <string name="string_context_menu_switchto">跳转到此程序</string>
+    <string name="string_context_menu_ingore">忽略此进程</string>
+
     <string name="string_memory_used_txt">已用内存:</string>
     <string name="string_memory_avail_txt">可用内存:</string>
 

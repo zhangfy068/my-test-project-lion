@@ -17,8 +17,12 @@
     <string name="string_cpu_status">CPU status</string>
     <string name="string_start_refresh_txt">Start refresh</string>
     <string name="string_refresh_complete_txt">Refresh Complete!</string>
+
+    <!--  Context menu string in main view -->
     <string name="string_context_menu_kill_txt">Kill</string>
     <string name="string_context_menu_switchto">Switch To</string>
+    <string name="string_context_menu_ingore">Ignore it</string>
+
     <string name="string_memory_used_txt">Used:</string>
     <string name="string_memory_avail_txt">Avail:</string>
 
