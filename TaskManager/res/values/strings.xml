@@ -9,6 +9,8 @@
 <resources>
 
     <string name="app_name">TaskManager</string>
+    <!-- option menu -->
+    <string name="menu_show_ignorelist">Show ingore list</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_taskmanager">Taskmanager</string>
     <string name="refreshing_dialog_title">Please wait</string>
@@ -41,4 +43,8 @@
     <string name="settings_swip_kill_switch_title">Enable swipe</string>
     <string name="settings_swip_kill_switch_summary">Enable swipe to kill process in process list</string>
 
+    <string name="strings_delete_txt">Delete</string>
+    <string name="strings_mark_all_txt">Mark All</string>
+    <string name="strings_unmark_all_txt">Unmark All</string>
+    <string name="string_list_empty">List is empty</string>
 </resources>

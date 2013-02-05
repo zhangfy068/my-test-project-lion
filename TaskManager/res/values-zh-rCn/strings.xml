@@ -9,6 +9,8 @@
 <resources>
 
     <string name="app_name">任务管理器</string>
+    <!-- option menu -->
+    <string name="menu_show_ignorelist">显示忽略列表</string>
     <string name="menu_settings">设定</string>
     <string name="title_activity_taskmanager">任务管理器</string>
     <string name="refreshing_dialog_title">请稍等</string>
@@ -41,4 +43,8 @@
     <string name="settings_swip_kill_switch_title">开启滑动手势</string>
     <string name="settings_swip_kill_switch_summary">在进程列表中可以通过滑动进程项以关闭进程</string>
 
+    <string name="strings_delete_txt">删除</string>
+    <string name="strings_mark_all_txt">全部标记</string>
+    <string name="strings_unmark_all_txt">取消标记</string>
+    <string name="string_list_empty">列表为空</string>
 </resources>

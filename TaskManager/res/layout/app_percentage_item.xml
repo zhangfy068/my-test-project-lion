@@ -14,8 +14,8 @@
 
     <ImageView
         android:id="@+id/app_icon"
-        android:layout_width="48dip"
-        android:layout_height="48dip"
+        android:layout_width="@dimen/general_item_image_width"
+        android:layout_height="@dimen/general_item_image_height"
         android:layout_marginRight="8dip"
         android:contentDescription="@null"
         android:scaleType="centerInside" />

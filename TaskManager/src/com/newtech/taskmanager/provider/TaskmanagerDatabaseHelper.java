@@ -26,7 +26,7 @@ public class TaskmanagerDatabaseHelper extends SQLiteOpenHelper {
     }
 
     /** The column of blacklist/viplist table in blacklist database */
-    public interface ContactColumns {
+    public interface TableColumns {
         public static final String _ID = BaseColumns._ID;
         public static final String PACKAGE_NAME = "package_name";
     }
@@ -51,14 +51,14 @@ public class TaskmanagerDatabaseHelper extends SQLiteOpenHelper {
     /** the sql statement of creating ignore table */
     private static final String CREATE_IGNORE_TABLE =
             "CREATE TABLE " + Tables.AUTOLIST + " ("
-            + ContactColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + ContactColumns.PACKAGE_NAME + " TEXT NOT NULL UNIQUE "
+            + TableColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + TableColumns.PACKAGE_NAME + " TEXT NOT NULL UNIQUE "
             + ");";
 
     /** the sql statement of creating autolist table */
     private static final String CREATE_AUTOLIST_TABLE =
             "CREATE TABLE " + Tables.IGNORELIST + " ("
-            + ContactColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + ContactColumns.PACKAGE_NAME + " TEXT NOT NULL UNIQUE "
+            + TableColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + TableColumns.PACKAGE_NAME + " TEXT NOT NULL UNIQUE "
             + ");";
 }

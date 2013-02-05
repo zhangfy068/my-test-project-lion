@@ -7,14 +7,12 @@ package com.newtech.taskmanager;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.app.ActivityManager;
 import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteException;
@@ -97,8 +95,6 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private RunningProcessStatus mRunningStatus;
 
-    private SharedPreferences mPrefs;
-
     private ContentResolver mContentResolver;
 
 	@Override
@@ -110,7 +106,6 @@ public class TaskmanagerActivity extends ListActivity implements
 		mColorBar = (LinearColorBar) findViewById(R.id.color_bar);
 		mUsedMemoryTextView = (TextView) findViewById(R.id.used_memory);
 		mAvailMemTextView = (TextView) findViewById(R.id.avail_memory);
-		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 		mTouchListener = new SwipeDismissListViewTouchListener(mListView,
 				new SwipeDismissListViewTouchListener.OnDismissCallback() {
@@ -160,7 +155,7 @@ public class TaskmanagerActivity extends ListActivity implements
 //			RefreshTask task = new RefreshTask();
 //			task.execute();
 		// }
-		if (mPrefs.getBoolean(Constants.SETTINGS_SWIPE_ENABLE, true)) {
+		if (Utils.isSupportSwipe(this.getApplicationContext())) {
 			mListView.setOnTouchListener(mTouchListener);
 			mListView.setOnScrollListener(mTouchListener.makeScrollListener());
 		} else {
@@ -170,7 +165,7 @@ public class TaskmanagerActivity extends ListActivity implements
 
 		if (mAdapter != null && mAppListWithoutSystemProcess != null
 				&& mAppListAll != null) {
-			if (isShowSystemProcess()) {
+			if (Utils.isShowSystemProcess(this.getApplicationContext())) {
 				mAppList = mAppListAll;
 			} else {
 				mAppList = mAppListWithoutSystemProcess;
@@ -180,9 +175,7 @@ public class TaskmanagerActivity extends ListActivity implements
 		}
 	}
 
-	private boolean isShowSystemProcess() {
-		return mPrefs.getBoolean(Constants.SETTINGS_SHOW_SYSTEM_PROCESS, true);
-	}
+
 	private void initProcess() {
 		mRunningStatus = new RunningProcessStatus(this.getApplicationContext());
 		mTotalMemory = Utils.getTotalMemory();
@@ -254,7 +247,13 @@ public class TaskmanagerActivity extends ListActivity implements
 			intent.setClass(this, SettingsPreferenceActivity.class);
 			startActivity(intent);
 			break;
-
+		case R.id.show_ignorelist:
+			Intent intentTemp = new Intent(Intent.ACTION_VIEW);
+			intentTemp.setClass(this, IgnoreListActivity.class);
+			startActivity(intentTemp);
+			break;
+		default:
+			break;
 		}
 		return true;
 	}
@@ -519,7 +518,7 @@ public class TaskmanagerActivity extends ListActivity implements
 		@Override
 		protected void onPostExecute(List<ProcessInfo> list) {
 			mAppListAll = list;
-			if (isShowSystemProcess()) {
+			if (Utils.isShowSystemProcess(TaskmanagerActivity.this)) {
 				mAppList = mAppListAll;
 			}else {
 				mAppList = mAppListWithoutSystemProcess;

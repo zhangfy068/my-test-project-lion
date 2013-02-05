@@ -7,7 +7,7 @@ import android.net.Uri;
 
 import com.newtech.taskmanager.provider.TaskmanagerContentProvider;
 import com.newtech.taskmanager.provider.TaskmanagerDatabaseHelper;
-import com.newtech.taskmanager.provider.TaskmanagerDatabaseHelper.ContactColumns;
+import com.newtech.taskmanager.provider.TaskmanagerDatabaseHelper.TableColumns;
 
 public class Constants {
 
@@ -20,7 +20,8 @@ public class Constants {
 	public static final int USER_PROCESS_ID = 10000;
 
 	// for ContentProvider
-	public static final String PACKAGE_NAME = ContactColumns.PACKAGE_NAME;
+	public static final String PACKAGE_NAME = TableColumns.PACKAGE_NAME;
+	public static final String _ID = TableColumns._ID;
 	/** The Uri for ignore list */
 	public static final Uri IGNORE_LIST_URI = Uri.withAppendedPath(
 			TaskmanagerContentProvider.CONTENT_URI,

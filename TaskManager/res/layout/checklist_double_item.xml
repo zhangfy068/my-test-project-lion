@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2013 The NewTech LTD. CORP
+     Modifications are licensed under the License.
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/checklist_double_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/contacts_list_item_relative_layout_height"
+    android:paddingBottom="@dimen/checklist_item_linear_layout_padding_bottom"
+    android:paddingLeft="@dimen/contacts_list_item_relative_layout_padding_left"
+    android:paddingTop="@dimen/checklist_item_linear_layout_padding_top" >
+
+    <ImageView
+        android:id="@+id/head_image"
+        android:layout_width="@dimen/general_item_image_width"
+        android:layout_height="@dimen/general_item_image_width"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/process_name"
+        style="?android:attr/textAppearanceMedium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/checklist_double_item_checklist_text_margin_left"
+        android:layout_toRightOf="@id/head_image"
+        android:gravity="center_vertical"
+        android:paddingRight="@dimen/checklist_double_item_checklist_text_padding_right"
+        android:visibility="gone" />
+
+    <CheckedTextView
+        android:id="@+id/checklist_check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/checklist_check_margin_left"
+        android:layout_marginRight="@dimen/checklist_check_margin_right"
+        android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+        android:gravity="center_vertical" />
+</RelativeLayout>

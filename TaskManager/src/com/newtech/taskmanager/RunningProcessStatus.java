@@ -8,16 +8,21 @@ package com.newtech.taskmanager;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.newtech.taskmanager.util.Constants;
 import com.newtech.taskmanager.util.TMLog;
+import com.newtech.taskmanager.util.Utils;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.os.Debug.MemoryInfo;
 import android.util.SparseArray;
 
@@ -27,12 +32,14 @@ public class RunningProcessStatus {
 	private Context mContext;
 	private ActivityManager mAm;
 	private PackageManager mPm;
+	private ContentResolver mContentResolver;
 
 	RunningProcessStatus(Context context) {
 		mContext = context;
 		mAm = (ActivityManager) mContext
 				.getSystemService(Activity.ACTIVITY_SERVICE);
 		mPm = (PackageManager) mContext.getPackageManager();
+		mContentResolver = mContext.getContentResolver();
 	}
 
 	/**
@@ -53,12 +60,14 @@ public class RunningProcessStatus {
 			try {
 				ApplicationInfo appInfo = mPm.getApplicationInfo(
 						info.processName, PackageManager.GET_ACTIVITIES);
-				ProcessInfo processInfo = new ProcessInfo(info.processName);
-				processInfo.setAppInfo(appInfo);
-				processInfo.setRunningInfo(info);
-				processInfo.updateBasicInfo(mPm);
-				tmpAppProcesses.put(info.pid, processInfo);
-				runningProcess.add(processInfo);
+				if (!isIgoreProcess(info.processName)) {
+					ProcessInfo processInfo = new ProcessInfo(info.processName);
+					processInfo.setAppInfo(appInfo);
+					processInfo.setRunningInfo(info);
+					processInfo.updateBasicInfo(mPm);
+					tmpAppProcesses.put(info.pid, processInfo);
+					runningProcess.add(processInfo);
+				}
 			} catch (NameNotFoundException e) {
 				// Just ignore it
 			}
@@ -90,5 +99,24 @@ public class RunningProcessStatus {
 		}
 		TMLog.end(TAG);
 		return runningProcess;
+	}
+
+	private boolean isIgoreProcess(String processName) {
+		Cursor cr = null;
+		try {
+			cr = mContentResolver.query(Constants.IGNORE_LIST_URI,
+					Utils.getIgnoreProject(), Constants.PACKAGE_NAME + "=?",
+					new String[] { processName }, null);
+			if (cr.moveToFirst()) {
+				return true;
+			}
+		} catch (SQLiteException e) {
+			e.printStackTrace();
+		} finally {
+			if (cr != null) {
+				cr.close();
+			}
+		}
+		return false;
 	}
 }

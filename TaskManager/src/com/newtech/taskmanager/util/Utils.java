@@ -6,11 +6,18 @@ package com.newtech.taskmanager.util;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 public class Utils {
 	public static int MB_SIZE = 1024 * 1024;
 
 	private static float mTotalMemory = 0;
+
+	/** The ContentResolver for query */
+	private final static String[] PROJECT_SELECTION = { Constants._ID,
+			Constants.PACKAGE_NAME };
 
 	/**
 	 * get the Total Memory of Phone.
@@ -27,7 +34,8 @@ public class Utils {
 	}
 
 	/**
-	 * @param a instance of AvtivityManager
+	 * @param a
+	 *            instance of AvtivityManager
 	 * @return Current free memory of phone. The size of memory is MB.
 	 */
 	public static float getLastestFreeMemory(ActivityManager am) {
@@ -36,5 +44,21 @@ public class Utils {
 		am.getMemoryInfo(mi);
 		freeMemory = (float) mi.availMem / MB_SIZE;
 		return freeMemory;
+	}
+
+	public static boolean isSupportSwipe(Context context) {
+		SharedPreferences sPref = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		return sPref.getBoolean(Constants.SETTINGS_SWIPE_ENABLE, true);
+	}
+
+	public static boolean isShowSystemProcess(Context context) {
+		SharedPreferences sPref = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		return sPref.getBoolean(Constants.SETTINGS_SHOW_SYSTEM_PROCESS, true);
+	}
+
+	public static String[] getIgnoreProject() {
+		return PROJECT_SELECTION.clone();
 	}
 }

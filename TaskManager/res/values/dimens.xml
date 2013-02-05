@@ -10,6 +10,22 @@
     <dimen name="general_list_item_padding_left">8dp</dimen>
     <dimen name="general_list_item_padding_right">8dp</dimen>
     <dimen name="general_list_item_padding_top">4dp</dimen>
-    <dimen name="general_empty_txt_top_padding">40dp</dimen>
 
+    <!-- checklist_double_item.xml -->
+    <dimen name="checklist_double_item_data_margin_left">3.3dp</dimen>
+    <dimen name="checklist_double_item_data_padding_right">40dp</dimen>
+    <dimen name="checklist_double_item_checklist_text_margin_left">8dp</dimen>
+    <dimen name="checklist_double_item_checklist_text_padding_right">40dp</dimen>
+    <dimen name="checklist_item_linear_layout_padding_top">2.7dp</dimen>
+    <dimen name="checklist_item_linear_layout_padding_bottom">2.7dp</dimen>
+    <dimen name="checklist_check_margin_left">5dp</dimen>
+    <dimen name="checklist_check_margin_right">5dp</dimen>
+    <!--  list item -->
+    <dimen name="contact_list_item_padding_left">6dip</dimen>
+    <dimen name="contacts_list_item_relative_layout_height">64dp</dimen>
+    <dimen name="contacts_list_item_relative_layout_padding_left">8dp</dimen>
+
+    <dimen name="general_item_image_width">48dip</dimen>
+    <dimen name="general_item_image_height">48dip</dimen>
+    <dimen name="general_empty_txt_top_padding">40dip</dimen>
 </resources>
