@@ -11,6 +11,7 @@
     <string name="app_name">任务管理器</string>
     <!-- option menu -->
     <string name="menu_show_ignorelist">显示忽略列表</string>
+    <string name="menu_show_autolist">显示自动关闭列表</string>
     <string name="menu_settings">设定</string>
     <string name="title_activity_taskmanager">任务管理器</string>
     <string name="refreshing_dialog_title">请稍等</string>
@@ -24,6 +25,7 @@
     <string name="string_context_menu_kill_txt">关闭程序</string>
     <string name="string_context_menu_switchto">跳转到此程序</string>
     <string name="string_context_menu_ingore">忽略此进程</string>
+    <string name="string_context_menu_autokill">自动关闭此进程</string>
 
     <string name="string_memory_used_txt">已用内存:</string>
     <string name="string_memory_avail_txt">可用内存:</string>

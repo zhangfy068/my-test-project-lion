@@ -55,6 +55,8 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private static final int CONTEXT_MENU_IGNORE = 2;
 
+	private static final int CONTEXT_MENU_AUTOKILL = 3;
+
 	private AppItemAdapter mAdapter;
 
 	private int mMaxMemory = 0;
@@ -175,7 +177,6 @@ public class TaskmanagerActivity extends ListActivity implements
 		}
 	}
 
-
 	private void initProcess() {
 		mRunningStatus = new RunningProcessStatus(this.getApplicationContext());
 		mTotalMemory = Utils.getTotalMemory();
@@ -207,6 +208,8 @@ public class TaskmanagerActivity extends ListActivity implements
 				R.string.string_context_menu_switchto);
 
 		aMenu.add(Menu.NONE, CONTEXT_MENU_IGNORE, 0, R.string.string_context_menu_ingore);
+
+		aMenu.add(Menu.NONE, CONTEXT_MENU_AUTOKILL, 0, R.string.string_context_menu_autokill);
 		if (processInfo.getIntent() == null) {
 			switchMenu.setEnabled(false);
 		}
@@ -232,7 +235,10 @@ public class TaskmanagerActivity extends ListActivity implements
 		    break;
 		case CONTEXT_MENU_IGNORE:
 			ignoreProcess(pos);
-			return true;
+			break;
+		case CONTEXT_MENU_AUTOKILL:
+			addAutoProcess(pos);
+			break;
 		default:
 			break;
 		}
@@ -248,9 +254,14 @@ public class TaskmanagerActivity extends ListActivity implements
 			startActivity(intent);
 			break;
 		case R.id.show_ignorelist:
-			Intent intentTemp = new Intent(Intent.ACTION_VIEW);
-			intentTemp.setClass(this, IgnoreListActivity.class);
-			startActivity(intentTemp);
+			Intent intentIgnore = new Intent(Intent.ACTION_VIEW);
+			intentIgnore.setClass(this, IgnorelistActivity.class);
+			startActivity(intentIgnore);
+			break;
+		case R.id.show_autolist:
+			Intent intentAuto = new Intent(Intent.ACTION_VIEW);
+			intentAuto.setClass(this, AutolistActivity.class);
+			startActivity(intentAuto);
 			break;
 		default:
 			break;
@@ -288,6 +299,18 @@ public class TaskmanagerActivity extends ListActivity implements
 		}
 	}
 
+	private void addAutoProcess(int pos) {
+		if (mAppList != null) {
+			String name = mAppList.get(pos).getPackageName();
+			ContentValues values = new ContentValues();
+			values.put(Constants.PACKAGE_NAME, name);
+			try {
+				mContentResolver.insert(Constants.AUTO_LIST_URI, values);
+			} catch (SQLiteException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 	//Could not find the better way to do this.
 	private void removeProcessFromLis(String processName) {
 		for(ProcessInfo info : mAppListWithoutSystemProcess) {

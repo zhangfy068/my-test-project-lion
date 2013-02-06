@@ -1,6 +1,8 @@
-/**
- * This class is used to log messages.
+/*
+ * CopyRight (C) 2013 NewTech CORP LTD.
+ * Constants.java
  */
+
 package com.newtech.taskmanager.util;
 
 import android.net.Uri;

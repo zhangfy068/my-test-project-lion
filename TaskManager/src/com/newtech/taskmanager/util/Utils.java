@@ -2,6 +2,7 @@
  * CopyRight (C) 2013 NewTech CORP LTD.
  * Utils.java
  */
+
 package com.newtech.taskmanager.util;
 
 import android.app.ActivityManager;
@@ -56,6 +57,18 @@ public class Utils {
 		SharedPreferences sPref = PreferenceManager
 				.getDefaultSharedPreferences(context);
 		return sPref.getBoolean(Constants.SETTINGS_SHOW_SYSTEM_PROCESS, true);
+	}
+
+	public static boolean isAutoRun(Context context) {
+		SharedPreferences sPref = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		return sPref.getBoolean(Constants.SETTINGS_AUTO_RUN, true);
+	}
+
+	public static boolean isAutoKill(Context context) {
+		SharedPreferences sPref = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		return sPref.getBoolean(Constants.SETTINGS_AUTO_KILL, true);
 	}
 
 	public static String[] getIgnoreProject() {
