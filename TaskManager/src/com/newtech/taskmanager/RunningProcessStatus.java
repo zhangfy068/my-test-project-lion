@@ -20,7 +20,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.os.Debug.MemoryInfo;
@@ -54,29 +53,29 @@ public class RunningProcessStatus {
 		ArrayList<ProcessInfo> runningProcess = new ArrayList<ProcessInfo>();
 		final SparseArray<ProcessInfo> tmpAppProcesses = new SparseArray<ProcessInfo>();
 		List<RunningAppProcessInfo> runnings = mAm.getRunningAppProcesses();
-
+		PackagesInfo packageInfo = new PackagesInfo(mContext);
 		// initialize the running application process
 		for (RunningAppProcessInfo info : runnings) {
-			try {
-				ApplicationInfo appInfo = mPm.getApplicationInfo(
-						info.processName, PackageManager.GET_ACTIVITIES);
-				if (!isIgoreProcess(info.processName)) {
-					ProcessInfo processInfo = new ProcessInfo(info.processName);
-					processInfo.setAppInfo(appInfo);
-					processInfo.setRunningInfo(info);
-					processInfo.updateBasicInfo(mPm);
-					tmpAppProcesses.put(info.pid, processInfo);
-					runningProcess.add(processInfo);
-				}
-			} catch (NameNotFoundException e) {
-				// Just ignore it
+			TMLog.d(TAG, ">>>>>>" + info.processName + "<<<<<<");
+			ApplicationInfo appInfo = packageInfo.getInfo(info.processName);
+			if (appInfo != null && !isIgoreProcess(info.processName)) {
+				ProcessInfo processInfo = new ProcessInfo(info.processName);
+				processInfo.setAppInfo(appInfo);
+				processInfo.setRunningInfo(info);
+				processInfo.updateBasicInfo(mPm);
+				tmpAppProcesses.put(info.pid, processInfo);
+				runningProcess.add(processInfo);
+				TMLog.d(TAG, processInfo.getName(mPm) + " "
+						+ appInfo.packageName + " PID:" + processInfo.getPid());
 			}
+
 		}
 
 		// find the running service for process
 		List<RunningServiceInfo> services = mAm
 				.getRunningServices(Integer.MAX_VALUE);
 		for (RunningServiceInfo service : services) {
+			TMLog.d(TAG, service.process + " PID:" + service.pid );
 			if (service.started && service.clientLabel != 0 && service.pid > 0) {
 				ProcessInfo processInfo = tmpAppProcesses.get(service.pid);
 				processInfo.addService(service);
@@ -118,5 +117,26 @@ public class RunningProcessStatus {
 			}
 		}
 		return false;
+	}
+
+	public class PackagesInfo {
+		private List<ApplicationInfo> appList;
+
+		public PackagesInfo(Context context) {
+			appList = mPm
+					.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES);
+		}
+
+		public ApplicationInfo getInfo(String name) {
+			if (name == null) {
+				return null;
+			}
+			for (ApplicationInfo appinfo : appList) {
+				if (name.equals(appinfo.processName)) {
+					return appinfo;
+				}
+			}
+			return null;
+		}
 	}
 }

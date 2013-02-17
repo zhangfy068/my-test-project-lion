@@ -155,12 +155,12 @@ public class ProcessInfo implements Comparator<Object> {
 		mName = mAppInfo.loadLabel(pm).toString();
 		mIcon = mAppInfo.loadIcon(pm);
 		try {
-			mIntent = pm.getLaunchIntentForPackage(mPackageName);
+			mIntent = pm.getLaunchIntentForPackage(mAppInfo.packageName);
 			if (mIntent != null) {
 				mIntent = mIntent.cloneFilter();
 				mIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 			}
-			PackageInfo pkginfo = pm.getPackageInfo(mPackageName,
+			PackageInfo pkginfo = pm.getPackageInfo(mAppInfo.packageName,
 					PackageManager.GET_ACTIVITIES);
 			if (pkginfo != null && pkginfo.activities != null
 					&& pkginfo.activities.length == 1) {
