@@ -1,1 +1,13 @@
+Feature list?
+
 1. autokill policy？
+2. UI layout?
+3. How to determin whether the process is system process (public boolean isSystemProcess())? And how to know whether the specified process can be killed and when to be killed?
+
+
+
+Defect list?
+1. In the context menu, touch event should not forward to main interface.
+2. The icon in contest menu should be resized the same.
+3. How to update the free mem when one process is killed.
+4. Compute the mem usage from Activities and Services which are running in the non-default application process? Check the source code of getRunningAppProcesses() and getRunningServices().
