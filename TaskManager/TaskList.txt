@@ -1,13 +1,42 @@
 Feature list?
 
-1. autokill policy？
-2. UI layout?
-3. How to determin whether the process is system process (public boolean isSystemProcess())? And how to know whether the specified process can be killed and when to be killed?
+(ZY)
+1. autokill policy? 
+   1). 2 minutes interval
+   2). kill all user processes
+   3). free memory is lower than 30%
+   when the percentage of available memory is higher than this value, we start to kill background application.
+6. add a button to close all applications
+10.branch out a branch for android 2.3 and below
+12.Add the Ad control in the bottom of main view.
+5. add a context menu to jump the application detail view in settings
+7. change the auto kill to not-auto kill list
+8. add the color for system process to diff system process from user process
 
+Arthur:
+3. How to determine whether the process is system process (public boolean isSystemProcess())?
+   And how to know whether the specified process can be killed and when to be killed?
+4. Data Usage Consumption
+11.Check the compatibility for API Level 10 and 14
+
+Backlog:
+2. UI layout?
+9. add a widget to implement one-button-kill-all
 
 
 Defect list?
+ZY:
+6. If the procees's name is too long, it will cover the memory info's text in item view.
+
+Arthur:
 1. In the context menu, touch event should not forward to main interface.
 2. The icon in contest menu should be resized the same.
+
+
+backlog:
+5. The checklistAcitivy will flicker when enable the swipe gesture and delete it.
+
+Not issue:
 3. How to update the free mem when one process is killed.
 4. Compute the mem usage from Activities and Services which are running in the non-default application process? Check the source code of getRunningAppProcesses() and getRunningServices().
+
