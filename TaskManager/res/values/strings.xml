@@ -26,6 +26,7 @@
     <string name="string_context_menu_switchto">Switch To</string>
     <string name="string_context_menu_ingore">Ignore it</string>
     <string name="string_context_menu_autokill">Auto kill it</string>
+    <string name="string_context_menu_detail">Details</string>
 
     <string name="string_memory_used_txt">Used:</string>
     <string name="string_memory_avail_txt">Avail:</string>

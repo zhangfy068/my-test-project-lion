@@ -31,7 +31,7 @@ public class ProcessInfo implements Comparator<Object> {
 
 	private ArrayList<RunningServiceInfo> mServiceList;
 
-	private String mPackageName;
+	private String mProcessName;
 
 	private int mMemory;
 
@@ -41,7 +41,7 @@ public class ProcessInfo implements Comparator<Object> {
 	private String mName;
 
 	ProcessInfo(String packageName) {
-		mPackageName = packageName;
+		mProcessName = packageName;
 	}
 
 	@Override
@@ -85,7 +85,11 @@ public class ProcessInfo implements Comparator<Object> {
 	}
 
 	public String getPackageName() {
-		return mPackageName;
+		return mAppInfo.packageName;
+	}
+
+	public String getProcessName() {
+	    return mProcessName;
 	}
 
 	public void setMemory(int memory) {
@@ -142,7 +146,7 @@ public class ProcessInfo implements Comparator<Object> {
 	public void killSelf(Context context) {
 		ActivityManager am = (ActivityManager) context
 				.getSystemService(Activity.ACTIVITY_SERVICE);
-		am.killBackgroundProcesses(mPackageName);
+		am.killBackgroundProcesses(mProcessName);
 
 		if (mServiceList != null) {
 			for (RunningServiceInfo service : mServiceList) {

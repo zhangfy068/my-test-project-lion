@@ -26,6 +26,7 @@
     <string name="string_context_menu_switchto">跳转到此程序</string>
     <string name="string_context_menu_ingore">忽略此进程</string>
     <string name="string_context_menu_autokill">自动关闭此进程</string>
+    <string name="string_context_menu_detail">查看应用详细信息</string>
 
     <string name="string_memory_used_txt">已用内存:</string>
     <string name="string_memory_avail_txt">可用内存:</string>

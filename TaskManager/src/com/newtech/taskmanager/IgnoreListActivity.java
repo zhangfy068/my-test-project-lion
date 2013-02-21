@@ -9,7 +9,7 @@ import android.net.Uri;
 
 import com.newtech.taskmanager.util.Constants;
 
-public class IgnorelistActivity extends CheckedListActivity {
+public class IgnoreListActivity extends CheckedListActivity {
 
 	@Override
 	protected Uri getUri() {

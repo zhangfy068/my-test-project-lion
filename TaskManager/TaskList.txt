@@ -1,7 +1,7 @@
 Feature list?
 
 (ZY)
-1. autokill policy? 
+1. autokill policy?  (Done)
    1). 2 minutes interval
    2). kill all user processes
    3). free memory is lower than 30%
@@ -9,7 +9,7 @@ Feature list?
 6. add a button to close all applications
 10.branch out a branch for android 2.3 and below
 12.Add the Ad control in the bottom of main view.
-5. add a context menu to jump the application detail view in settings
+5. add a context menu to jump the application detail view in settings (Done)
 7. change the auto kill to not-auto kill list
 8. add the color for system process to diff system process from user process
 

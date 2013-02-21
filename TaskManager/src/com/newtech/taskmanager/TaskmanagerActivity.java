@@ -5,8 +5,11 @@
 
 package com.newtech.taskmanager;
 
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.app.ActivityManager;
 import android.app.ListActivity;
 import android.content.ContentResolver;
@@ -48,7 +51,7 @@ public class TaskmanagerActivity extends ListActivity implements
 		View.OnClickListener, OnItemClickListener,
 		View.OnCreateContextMenuListener {
 	private static final String TAG = "TaskmanagerActivity";
-
+	private static final String SCHEME = "package";
 	private static final int CONTEXT_MENU_KILL = 0;
 
 	private static final int CONTEXT_MENU_SWICHTO = 1;
@@ -56,6 +59,8 @@ public class TaskmanagerActivity extends ListActivity implements
 	private static final int CONTEXT_MENU_IGNORE = 2;
 
 	private static final int CONTEXT_MENU_AUTOKILL = 3;
+
+    private static final int CONTEXT_MENU_DETAIL = 4;
 
 	private AppItemAdapter mAdapter;
 
@@ -98,6 +103,8 @@ public class TaskmanagerActivity extends ListActivity implements
 	private RunningProcessStatus mRunningStatus;
 
     private ContentResolver mContentResolver;
+
+    private static int API_LEVEL = Build.VERSION.SDK_INT;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -157,7 +164,7 @@ public class TaskmanagerActivity extends ListActivity implements
 //			RefreshTask task = new RefreshTask();
 //			task.execute();
 		// }
-		if (Utils.isSupportSwipe(this.getApplicationContext())) {
+		if (Utils.isSupportSwipe(this.getApplicationContext()) && API_LEVEL > 11) {
 			mListView.setOnTouchListener(mTouchListener);
 			mListView.setOnScrollListener(mTouchListener.makeScrollListener());
 		} else {
@@ -199,21 +206,22 @@ public class TaskmanagerActivity extends ListActivity implements
 		} catch (ClassCastException e) {
 			return;
 		}
-		ProcessInfo processInfo = mAppList.get(info.position);
-		aMenu.setHeaderIcon(processInfo.getIcon(mPm));
-		aMenu.setHeaderTitle(processInfo.getName(mPm));
-		aMenu.add(Menu.NONE, CONTEXT_MENU_KILL, 0,
-				R.string.string_context_menu_kill_txt);
-		MenuItem switchMenu = aMenu.add(Menu.NONE, CONTEXT_MENU_SWICHTO, 0,
-				R.string.string_context_menu_switchto);
-
-		aMenu.add(Menu.NONE, CONTEXT_MENU_IGNORE, 0, R.string.string_context_menu_ingore);
-
-		aMenu.add(Menu.NONE, CONTEXT_MENU_AUTOKILL, 0, R.string.string_context_menu_autokill);
-		if (processInfo.getIntent() == null) {
-			switchMenu.setEnabled(false);
-		}
-	}
+        ProcessInfo processInfo = mAppList.get(info.position);
+        aMenu.setHeaderIcon(processInfo.getIcon(mPm));
+        aMenu.setHeaderTitle(processInfo.getName(mPm));
+        aMenu.add(Menu.NONE, CONTEXT_MENU_KILL, 0,
+                R.string.string_context_menu_kill_txt);
+        if (processInfo.getIntent() != null) {
+            aMenu.add(Menu.NONE, CONTEXT_MENU_SWICHTO, 0,
+                    R.string.string_context_menu_switchto);
+        }
+        aMenu.add(Menu.NONE, CONTEXT_MENU_IGNORE, 0,
+                R.string.string_context_menu_ingore);
+        aMenu.add(Menu.NONE, CONTEXT_MENU_AUTOKILL, 0,
+                R.string.string_context_menu_autokill);
+        aMenu.add(Menu.NONE, CONTEXT_MENU_DETAIL, 0,
+                R.string.string_context_menu_detail);
+    }
 
 	@Override
 	public boolean onContextItemSelected(final MenuItem aItem) {
@@ -239,6 +247,9 @@ public class TaskmanagerActivity extends ListActivity implements
 		case CONTEXT_MENU_AUTOKILL:
 			addAutoProcess(pos);
 			break;
+		case CONTEXT_MENU_DETAIL:
+		    showDetail(pos);
+		    break;
 		default:
 			break;
 		}
@@ -255,7 +266,7 @@ public class TaskmanagerActivity extends ListActivity implements
 			break;
 		case R.id.show_ignorelist:
 			Intent intentIgnore = new Intent(Intent.ACTION_VIEW);
-			intentIgnore.setClass(this, IgnorelistActivity.class);
+			intentIgnore.setClass(this, IgnoreListActivity.class);
 			startActivity(intentIgnore);
 			break;
 		case R.id.show_autolist:
@@ -272,7 +283,7 @@ public class TaskmanagerActivity extends ListActivity implements
 	private void killProcess(int position) {
 		if (mAppList != null) {
 			ProcessInfo info = mAppList.get(position);
-			removeProcessFromLis(info.getPackageName());
+			removeProcessFromLis(info.getProcessName());
 			info.killSelf(this);
 			sortList(mAppList);
 			mMaxMemory = mAppList.get(0).getMemory();
@@ -287,7 +298,7 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private void ignoreProcess(int pos) {
 		if (mAppList != null) {
-			String name = mAppList.get(pos).getPackageName();
+			String name = mAppList.get(pos).getProcessName();
 			ContentValues values = new ContentValues();
 			values.put(Constants.PACKAGE_NAME, name);
 			try {
@@ -301,7 +312,7 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private void addAutoProcess(int pos) {
 		if (mAppList != null) {
-			String name = mAppList.get(pos).getPackageName();
+			String name = mAppList.get(pos).getProcessName();
 			ContentValues values = new ContentValues();
 			values.put(Constants.PACKAGE_NAME, name);
 			try {
@@ -311,10 +322,21 @@ public class TaskmanagerActivity extends ListActivity implements
 			}
 		}
 	}
+
+	private void showDetail(int pos) {
+	    if (mAppList != null) {
+            ProcessInfo info = mAppList.get(pos);
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts(SCHEME, info.getPackageName(), null);
+            intent.setData(uri);
+            startActivity(intent);
+	    }
+	}
+
 	//Could not find the better way to do this.
 	private void removeProcessFromLis(String processName) {
 		for(ProcessInfo info : mAppListWithoutSystemProcess) {
-			if(TextUtils.equals(info.getPackageName(), processName)){
+			if(TextUtils.equals(info.getProcessName(), processName)){
 				mAppListWithoutSystemProcess.remove(info);
 				break;
 			}

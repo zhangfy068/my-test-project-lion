@@ -47,7 +47,7 @@
         </activity>
 
         <activity
-            android:name=".IgnorelistActivity"
+            android:name=".IgnoreListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
             android:theme="@style/AppTheme" >

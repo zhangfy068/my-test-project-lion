@@ -8,6 +8,7 @@ package com.newtech.taskmanager;
 import com.newtech.taskmanager.util.Constants;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
@@ -24,6 +25,11 @@ public class SettingsPreferenceActivity extends PreferenceActivity {
 
 		SwitchPreference autoKill = (SwitchPreference) this
 				.findPreference(Constants.SETTINGS_AUTO_KILL);
+        SwitchPreference swipeEnabler = (SwitchPreference) this
+                .findPreference(Constants.SETTINGS_SWIPE_ENABLE);
+        if(Build.VERSION.SDK_INT < 11 ) {
+            swipeEnabler.setEnabled(false);
+        }
 		autoKill.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 			@Override
 			public boolean onPreferenceChange(Preference preference,

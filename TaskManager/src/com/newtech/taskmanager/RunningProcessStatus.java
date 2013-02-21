@@ -100,6 +100,50 @@ public class RunningProcessStatus {
 		return runningProcess;
 	}
 
+	   /**
+     * Get the current proccess's information. Notice: this method will spend
+     * long time. Use it in the work thread.
+     *
+     * @return ArrayList<ProcessInfo> the list of all running application's
+     *         information
+     */
+    public synchronized ArrayList<ProcessInfo> getRunningAppforService() {
+        TMLog.begin(TAG);
+        ArrayList<ProcessInfo> runningProcess = new ArrayList<ProcessInfo>();
+        final SparseArray<ProcessInfo> tmpAppProcesses = new SparseArray<ProcessInfo>();
+        List<RunningAppProcessInfo> runnings = mAm.getRunningAppProcesses();
+        PackagesInfo packageInfo = new PackagesInfo(mContext);
+        // initialize the running application process
+        for (RunningAppProcessInfo info : runnings) {
+            ApplicationInfo appInfo = packageInfo.getInfo(info.processName);
+            if (appInfo != null && !isIgoreProcess(info.processName)) {
+                ProcessInfo processInfo = new ProcessInfo(info.processName);
+                processInfo.setAppInfo(appInfo);
+                processInfo.setRunningInfo(info);
+                processInfo.updateBasicInfo(mPm);
+                if (processInfo.isSystemProcess()) {
+                    // ignore all system process for service
+                    continue;
+                }
+                tmpAppProcesses.put(info.pid, processInfo);
+                TMLog.d(TAG, "Process Name: " + processInfo.getProcessName()
+                        + "IMPORTANCE:" + processInfo.getImportance());
+                runningProcess.add(processInfo);
+            }
+        }
+
+        // find the running service for process
+        List<RunningServiceInfo> services = mAm
+                .getRunningServices(Integer.MAX_VALUE);
+        for (RunningServiceInfo service : services) {
+            if (service.started && service.clientLabel != 0 && service.pid > 0) {
+                ProcessInfo processInfo = tmpAppProcesses.get(service.pid);
+                processInfo.addService(service);
+            }
+        }
+        return runningProcess;
+    }
+
 	private boolean isIgoreProcess(String processName) {
 		Cursor cr = null;
 		try {
