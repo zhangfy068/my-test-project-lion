@@ -1,0 +1,9 @@
+1. How to get the SDK version?
+    if (Build.VERSION.SDK_INT >= 8)
+    {
+      this.jdField_a_of_type_AndroidAppActivityManager.killBackgroundProcesses(paramString);
+      return;
+    }
+    this.jdField_a_of_type_AndroidAppActivityManager.restartPackage(paramString);
+  }
+
