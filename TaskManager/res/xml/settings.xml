@@ -20,7 +20,7 @@
         android:summary="@string/settings_auto_kill_summary" />
 
     <!-- view configure -->
-    <PreferenceCategory android:title="@string/settings_operation_configure" />
+    <PreferenceCategory android:title="@string/settings_operation_title" />
 
     <CheckBoxPreference
         android:defaultValue="false"

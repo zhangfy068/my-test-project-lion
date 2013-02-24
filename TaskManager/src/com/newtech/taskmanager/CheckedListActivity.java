@@ -19,6 +19,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -343,15 +344,21 @@ public abstract class CheckedListActivity extends ListActivity implements
 			return null;
 		}
 
-		@Override
-		protected void onPostExecute(Cursor aCursor) {
-			if (aCursor != null) {
-				mAdapter.swapCursor(aCursor);
-		        updateButtonState();
-		        setEmptyText();
-			}
-		}
-	}
+        @Override
+        protected void onPostExecute(Cursor aCursor) {
+            if (aCursor != null) {
+                if (Build.VERSION.SDK_INT >= 11) {
+                    mAdapter.swapCursor(aCursor);
+                } else {
+                    mAdapter = new MulttipleChoiceListAdapter(
+                            CheckedListActivity.this, aCursor);
+                    setListAdapter(mAdapter);
+                }
+                updateButtonState();
+                setEmptyText();
+            }
+        }
+    }
 
 	class DeleteItemsTask extends AsyncTask<Void, Void, Void> {
 

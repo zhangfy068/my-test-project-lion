@@ -70,62 +70,20 @@ public class TaskManagerService extends Service {
         int count = mAppListAll.size();
         for (int i = 0; i < count; i++) {
             ProcessInfo process = mAppListAll.get(i);
-            if (process.getImportance() == RunningAppProcessInfo.IMPORTANCE_EMPTY) {
+            if (!process.isService()) {
                 process.killSelf(this);
                 mAppListAll.remove(i);
+                i--;
                 count--;
             }
         }
-
-        if (getPercentAgeOfAvailMemory() > MEMORY_LEVEL) {
-            // 40% Avail Memory already, return;
-            return;
-        }
-
-        // start to kill background process
-        count = mAppListAll.size();
-        for (int i = 0; i < count; i++) {
-            ProcessInfo process = mAppListAll.get(i);
-            if (process.getImportance() == RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
-                if (getPercentAgeOfAvailMemory() > MEMORY_LEVEL) {
-                    return;
-                }
+        if (getPercentAgeOfAvailMemory() < MEMORY_LEVEL) {
+            count = mAppListAll.size();
+            for (int i = 0; i < count; i++) {
+                ProcessInfo process = mAppListAll.get(i);
                 process.killSelf(this);
-                TMLog.d(TAG, process.getProcessName()
-                        + " was killed by auto service");
                 mAppListAll.remove(i);
-                count--;
-            }
-        }
-
-        // start to kill service
-        count = mAppListAll.size();
-        for (int i = 0; i < count; i++) {
-            ProcessInfo process = mAppListAll.get(i);
-            if (process.getImportance() == RunningAppProcessInfo.IMPORTANCE_SERVICE) {
-                if (getPercentAgeOfAvailMemory() > MEMORY_LEVEL) {
-                    return;
-                }
-                process.killSelf(this);
-                TMLog.d(TAG, process.getPackageName()
-                        + " was killed by auto service");
-                mAppListAll.remove(i);
-                count--;
-            }
-        }
-
-        // start to try to kill visible service
-        count = mAppListAll.size();
-        for (int i = 0; i < count; i++) {
-            ProcessInfo process = mAppListAll.get(i);
-            if (process.getImportance() == RunningAppProcessInfo.IMPORTANCE_VISIBLE) {
-                if (getPercentAgeOfAvailMemory() > MEMORY_LEVEL) {
-                    return;
-                }
-                process.killSelf(this);
-                TMLog.d(TAG, process.getPackageName()
-                        + " was killed by auto service");
-                mAppListAll.remove(i);
+                i--;
                 count--;
             }
         }

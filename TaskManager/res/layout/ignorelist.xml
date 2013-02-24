@@ -13,14 +13,12 @@
         android:id="@+id/buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="?android:attr/buttonBarStyle"
         android:layout_alignParentBottom="true" >
 
         <Button
             android:id="@+id/mark_all_button"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_weight="1" />
 
         <Button
@@ -28,7 +26,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/strings_delete_txt"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_weight="1" />
     </LinearLayout>
 

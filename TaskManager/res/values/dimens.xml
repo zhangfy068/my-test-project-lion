@@ -7,8 +7,8 @@
 -->
 <resources>
 
-    <dimen name="general_list_item_padding_left">8dp</dimen>
-    <dimen name="general_list_item_padding_right">8dp</dimen>
+    <dimen name="general_list_item_padding_left">4dp</dimen>
+    <dimen name="general_list_item_padding_right">4dp</dimen>
     <dimen name="general_list_item_padding_top">4dp</dimen>
 
     <!-- checklist_double_item.xml -->

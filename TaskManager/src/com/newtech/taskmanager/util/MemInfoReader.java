@@ -17,8 +17,11 @@
 package com.newtech.taskmanager.util;
 import java.io.FileInputStream;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.StrictMode;
 
+@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 public class MemInfoReader {
     byte[] mBuffer = new byte[1024];
 

@@ -39,7 +39,7 @@
     <string name="settings_auto_kill_title">自动关闭后台进程</string>
     <string name="settings_auto_kill_summary">系统将自动关闭不再使用的后台进程</string>
 
-    <string name="settings_operation_configure">操作和视图</string>
+    <string name="settings_operation_title">操作和视图</string>
     <string name="settings_show_system_switch_title">显示系统进程</string>
     <string name="settings_show_system_swith_summary">将显示所有系统进程,系统进程的名字将以蓝色字体标示</string>
     <string name="settings_show_service_title">显示服务和前台进程</string>
