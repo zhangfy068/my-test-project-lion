@@ -7,6 +7,7 @@ package com.newtech.taskmanager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -68,8 +69,10 @@ import java.util.List;
  * 
  * @see SwipeDismissTouchListener
  */
+@TargetApi(12)
 public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 
+    private static final String TAG = "SwipeDismissListViewTouchListener";
 	// Cached ViewConfiguration and system-wide constant values
 	private int mSlop;
 	private int mMinFlingVelocity;

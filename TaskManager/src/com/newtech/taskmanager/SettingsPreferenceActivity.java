@@ -13,7 +13,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
-import android.preference.SwitchPreference;
+import android.preference.CheckBoxPreference;
 
 public class SettingsPreferenceActivity extends PreferenceActivity {
 
@@ -23,9 +23,9 @@ public class SettingsPreferenceActivity extends PreferenceActivity {
 		super.onCreate(bundle);
 		this.addPreferencesFromResource(R.xml.settings);
 
-		SwitchPreference autoKill = (SwitchPreference) this
+		CheckBoxPreference autoKill = (CheckBoxPreference) this
 				.findPreference(Constants.SETTINGS_AUTO_KILL);
-        SwitchPreference swipeEnabler = (SwitchPreference) this
+		CheckBoxPreference swipeEnabler = (CheckBoxPreference) this
                 .findPreference(Constants.SETTINGS_SWIPE_ENABLE);
         if(Build.VERSION.SDK_INT < 11 ) {
             swipeEnabler.setEnabled(false);

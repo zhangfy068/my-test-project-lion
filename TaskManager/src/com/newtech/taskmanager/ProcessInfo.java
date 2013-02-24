@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import com.newtech.taskmanager.util.Constants;
+import com.newtech.taskmanager.util.SystemProcess;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -23,26 +24,29 @@ import android.graphics.drawable.Drawable;
 
 public class ProcessInfo implements Comparator<Object> {
 
-	private static Comparator<Object> mInstnceComparator;
+    private static Comparator<Object> mInstnceComparator;
 
-	private RunningAppProcessInfo mRunningInfo;
+    private RunningAppProcessInfo mRunningInfo;
 
-	private ApplicationInfo mAppInfo;
+    private ApplicationInfo mAppInfo;
 
-	private ArrayList<RunningServiceInfo> mServiceList;
+    private ArrayList<RunningServiceInfo> mServiceList;
 
-	private String mProcessName;
+    private String mProcessName;
+//    private String mServiceName;
 
-	private int mMemory;
+    private int mMemory;
 
-	//Loading them in updateBasicInfo() to improve the performance
-	private Drawable mIcon;
-	private Intent mIntent;
-	private String mName;
+    // Loading them in updateBasicInfo() to improve the performance
+    private Drawable mIcon;
+    private Intent mIntent;
+    private String mName;
 
-	ProcessInfo(String packageName) {
-		mProcessName = packageName;
-	}
+    private boolean mIsSystemProcess = false;
+
+    ProcessInfo(String packageName) {
+        mProcessName = packageName;
+    }
 
 	@Override
 	public int compare(Object arg0, Object arg1) {
@@ -100,14 +104,25 @@ public class ProcessInfo implements Comparator<Object> {
 		return mMemory;
 	}
 
+	private void setSystemProcess(boolean isSystemProcess) {
+	    mIsSystemProcess = isSystemProcess;
+	}
+
 	public boolean isSystemProcess() {
 		// return (mAppInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-		if (getImportance() < RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE
-				|| getUid() < Constants.USER_PROCESS_ID) {
+		if ( getUid() < Constants.USER_PROCESS_ID) {
 			return true;
 		}
-		return false;
+		return mIsSystemProcess;
 	}
+
+    public boolean isService() {
+        if (getImportance() <= RunningAppProcessInfo.IMPORTANCE_SERVICE) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 	public RunningAppProcessInfo getRunningInfo() {
 		return mRunningInfo;
@@ -146,8 +161,10 @@ public class ProcessInfo implements Comparator<Object> {
 	public void killSelf(Context context) {
 		ActivityManager am = (ActivityManager) context
 				.getSystemService(Activity.ACTIVITY_SERVICE);
-		am.killBackgroundProcesses(mProcessName);
-
+		am.killBackgroundProcesses(getPackageName());
+//        if (isService()) {
+//            context.stopService(new Intent().setComponent());
+//        }
 		if (mServiceList != null) {
 			for (RunningServiceInfo service : mServiceList) {
 				context.stopService(new Intent().setComponent(service.service));
@@ -158,11 +175,14 @@ public class ProcessInfo implements Comparator<Object> {
 	public void updateBasicInfo(PackageManager pm) {
 		mName = mAppInfo.loadLabel(pm).toString();
 		mIcon = mAppInfo.loadIcon(pm);
+		setSystemProcess(SystemProcess.isSystemList(mProcessName));
+
 		try {
 			mIntent = pm.getLaunchIntentForPackage(mAppInfo.packageName);
 			if (mIntent != null) {
 				mIntent = mIntent.cloneFilter();
 				mIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+				return;
 			}
 			PackageInfo pkginfo = pm.getPackageInfo(mAppInfo.packageName,
 					PackageManager.GET_ACTIVITIES);

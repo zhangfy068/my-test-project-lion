@@ -6,12 +6,11 @@ Feature list?
    2). kill all user processes
    3). free memory is lower than 30%
    when the percentage of available memory is higher than this value, we start to kill background application.
-6. add a button to close all applications
-10.branch out a branch for android 2.3 and below
+6. add a button to close all applications (Done)
 12.Add the Ad control in the bottom of main view.
 5. add a context menu to jump the application detail view in settings (Done)
 7. change the auto kill to not-auto kill list
-8. add the color for system process to diff system process from user process
+8. add the color for system process to diff system process from user process(Done)
 
 Arthur:
 3. How to determine whether the process is system process (public boolean isSystemProcess())?
@@ -39,4 +38,4 @@ backlog:
 Not issue:
 3. How to update the free mem when one process is killed.
 4. Compute the mem usage from Activities and Services which are running in the non-default application process? Check the source code of getRunningAppProcesses() and getRunningServices().
-
+10.branch out a branch for android 2.3 and below, don't need it anymore.Use the build_VERSION.SDK_INT to control

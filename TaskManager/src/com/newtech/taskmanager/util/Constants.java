@@ -6,6 +6,7 @@
 package com.newtech.taskmanager.util;
 
 import android.net.Uri;
+import android.os.Build;
 
 import com.newtech.taskmanager.provider.TaskmanagerContentProvider;
 import com.newtech.taskmanager.provider.TaskmanagerDatabaseHelper;
@@ -18,8 +19,11 @@ public class Constants {
 	public static final String SETTINGS_AUTO_KILL = "auto_kill";
 	public static final String SETTINGS_SHOW_SYSTEM_PROCESS = "show_system_process";
 	public static final String SETTINGS_SWIPE_ENABLE = "swipe_kill_enable";
+	public static final String SETTINGS_SHOW_SERVICE = "show_service";
 
 	public static final int USER_PROCESS_ID = 10000;
+
+    public static int API_LEVEL = Build.VERSION.SDK_INT;
 
 	// for ContentProvider
 	public static final String PACKAGE_NAME = TableColumns.PACKAGE_NAME;

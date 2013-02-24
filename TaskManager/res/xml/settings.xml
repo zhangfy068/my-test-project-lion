@@ -6,13 +6,13 @@
 
     <PreferenceCategory android:title="@string/settings_system_configure" />
 
-    <SwitchPreference
+    <CheckBoxPreference
         android:defaultValue="true"
         android:key="auto_run"
         android:persistent="true"
         android:title="@string/settings_auto_run_title"
         android:summary="@string/settings_auto_run_summary"/>
-    <SwitchPreference
+    <CheckBoxPreference
         android:defaultValue="true"
         android:key="auto_kill"
         android:persistent="true"
@@ -22,14 +22,21 @@
     <!-- view configure -->
     <PreferenceCategory android:title="@string/settings_operation_configure" />
 
-    <SwitchPreference
+    <CheckBoxPreference
         android:defaultValue="false"
         android:key="show_system_process"
         android:persistent="true"
         android:title="@string/settings_show_system_switch_title"
         android:summary="@string/settings_show_system_swith_summary" />
 
-     <SwitchPreference
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="show_service"
+        android:persistent="true"
+        android:title="@string/settings_show_service_title"
+        android:summary="@string/settings_show_service_summary" />
+
+     <CheckBoxPreference
         android:defaultValue="true"
         android:key="swipe_kill_enable"
         android:persistent="true"

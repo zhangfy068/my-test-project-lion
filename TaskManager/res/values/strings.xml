@@ -41,8 +41,9 @@
 
     <string name="settings_operation_title">Operatiton And View</string>
     <string name="settings_show_system_switch_title">Show system process</string>
-    <string name="settings_show_system_swith_summary">Show all system processes</string>
-
+    <string name="settings_show_system_swith_summary">Show all system processes. The System processes will show in Blue color</string>
+    <string name="settings_show_service_title">Show Service and Foreground Process</string>
+    <string name="settings_show_service_summary">Show all serivces and foreground processes. These processes will show in Green color</string>
     <string name="settings_swip_kill_switch_title">Enable swipe</string>
     <string name="settings_swip_kill_switch_summary">Enable swipe to kill process in process list</string>
 
@@ -50,4 +51,5 @@
     <string name="strings_mark_all_txt">Mark All</string>
     <string name="strings_unmark_all_txt">Unmark All</string>
     <string name="string_list_empty">List is empty</string>
+    <string name="string_btn_kill_all">Kill All</string>
 </resources>

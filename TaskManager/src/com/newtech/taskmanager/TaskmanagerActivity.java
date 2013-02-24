@@ -7,10 +7,10 @@ package com.newtech.taskmanager;
 
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteException;
+import android.graphics.Color;
 import android.text.TextUtils;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -27,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
@@ -75,12 +77,17 @@ public class TaskmanagerActivity extends ListActivity implements
 	private List<ProcessInfo> mAppList;
 
 	//two list for withProcess and all process. These two list share object
-	private List<ProcessInfo> mAppListWithoutSystemProcess;
-	private List<ProcessInfo> mAppListAll;
-
+	private ArrayList<ProcessInfo> mNormalProcess;
+//	private List<ProcessInfo> mAppListAll;
+	//ServiceProcess includes all services and foregrould/visible process
+	private ArrayList<ProcessInfo> mServiceProcess;
+    //All System Process
+	private ArrayList<ProcessInfo> mSystemProcess;
 	private Spinner mSpinner;
 
 	private Button mRefreshButton;
+
+	private Button mKillAllButton;
 
 	private ActivityManager mAm;
 
@@ -91,7 +98,7 @@ public class TaskmanagerActivity extends ListActivity implements
 	private LinearColorBar mColorBar;
 
 	private View mProcessView;
-
+	private TextView mEmptyView;
 	private float mTotalMemory;
 	private float mAvailMemory;
 
@@ -104,8 +111,6 @@ public class TaskmanagerActivity extends ListActivity implements
 
     private ContentResolver mContentResolver;
 
-    private static int API_LEVEL = Build.VERSION.SDK_INT;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -116,18 +121,19 @@ public class TaskmanagerActivity extends ListActivity implements
 		mUsedMemoryTextView = (TextView) findViewById(R.id.used_memory);
 		mAvailMemTextView = (TextView) findViewById(R.id.avail_memory);
 
-		mTouchListener = new SwipeDismissListViewTouchListener(mListView,
-				new SwipeDismissListViewTouchListener.OnDismissCallback() {
-					@Override
-					public void onDismiss(ListView listView,
-							int[] reverseSortedPositions) {
-						for (int position : reverseSortedPositions) {
-							killProcess(position);
-						}
-					}
-				});
-		mTouchListener.setKeyForTagofForbidSwip(R.id.app_summary);
-
+        if (Constants.API_LEVEL > 12) {
+            mTouchListener = new SwipeDismissListViewTouchListener(mListView,
+                    new SwipeDismissListViewTouchListener.OnDismissCallback() {
+                        @Override
+                        public void onDismiss(ListView listView,
+                                int[] reverseSortedPositions) {
+                            for (int position : reverseSortedPositions) {
+                                killProcess(position);
+                            }
+                        }
+                    });
+            mTouchListener.setKeyForTagofForbidSwip(R.id.app_summary);
+        }
 		mListView.setOnItemClickListener(this);
 
 		mAm = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -140,10 +146,15 @@ public class TaskmanagerActivity extends ListActivity implements
 		mRefreshButton = (Button) this.findViewById(R.id.refresh_btn);
 		mProcessView = this.findViewById(R.id.loading_process);
 		mRefreshButton.setOnClickListener(this);
+
+        mKillAllButton = (Button) this.findViewById(R.id.kill_all);
+        mKillAllButton.setOnClickListener(this);
+
 		mSpinnerAdapter = ArrayAdapter.createFromResource(this,
 				R.array.snipper_filter_arrays,
 				android.R.layout.simple_spinner_dropdown_item);
 		mSpinner.setAdapter(mSpinnerAdapter);
+	    mEmptyView= (TextView)findViewById(R.id.emptyText);
 		registerForContextMenu(getListView());
 		initProcess();
 	}
@@ -156,33 +167,35 @@ public class TaskmanagerActivity extends ListActivity implements
 		super.onDestroy();
 	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		// refresh process when resumed.
-//		if (!mOnRefresh) {
-//			RefreshTask task = new RefreshTask();
-//			task.execute();
-		// }
-		if (Utils.isSupportSwipe(this.getApplicationContext()) && API_LEVEL > 11) {
-			mListView.setOnTouchListener(mTouchListener);
-			mListView.setOnScrollListener(mTouchListener.makeScrollListener());
-		} else {
-			mListView.setOnTouchListener(null);
-			mListView.setOnScrollListener(null);
-		}
+    @Override
+    public void onResume() {
+        super.onResume();
 
-		if (mAdapter != null && mAppListWithoutSystemProcess != null
-				&& mAppListAll != null) {
-			if (Utils.isShowSystemProcess(this.getApplicationContext())) {
-				mAppList = mAppListAll;
-			} else {
-				mAppList = mAppListWithoutSystemProcess;
-			}
-			mMaxMemory = mAppList.get(0).getMemory();
-			mAdapter.notifyDataSetChanged();
-		}
-	}
+        if (Utils.isSupportSwipe(this.getApplicationContext())
+                && Constants.API_LEVEL > 12) {
+            mListView.setOnTouchListener(mTouchListener);
+            mListView.setOnScrollListener(mTouchListener.makeScrollListener());
+        } else {
+            mListView.setOnTouchListener(null);
+            mListView.setOnScrollListener(null);
+        }
+
+        if (mAdapter != null) {
+            // && mAppListAll != null) {
+            // if (Utils.isShowSystemProcess(this.getApplicationContext())) {
+            // mAppList = mAppListAll;
+            // } else {
+            // mAppList = mNormalProcess;
+            // }
+            // if (mAppList.size() > 0) {
+            // mMaxMemory = mAppList.get(0).getMemory();
+            // }
+            filterAppList();
+            mAdapter.notifyDataSetChanged();
+            updateEmtpyView();
+        }
+        // }
+    }
 
 	private void initProcess() {
 		mRunningStatus = new RunningProcessStatus(this.getApplicationContext());
@@ -205,6 +218,12 @@ public class TaskmanagerActivity extends ListActivity implements
 			info = (AdapterView.AdapterContextMenuInfo) aMenuInfo;
 		} catch (ClassCastException e) {
 			return;
+		}
+		if( aView.hasFocus() ) {
+		    TMLog.d(TAG, "aView hasFocus.");
+		}
+		if(mAppList.size() == 0) {
+		    return;
 		}
         ProcessInfo processInfo = mAppList.get(info.position);
         aMenu.setHeaderIcon(processInfo.getIcon(mPm));
@@ -280,12 +299,28 @@ public class TaskmanagerActivity extends ListActivity implements
 		return true;
 	}
 
+    private void updateEmtpyView() {
+        if (mAppList != null ) {
+            if(mAppList.size() == 0) {
+                mEmptyView.setVisibility(View.VISIBLE);
+            }else {
+                mEmptyView.setVisibility(View.GONE);
+                mEmptyView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+            }
+        }
+    }
+
 	private void killProcess(int position) {
 		if (mAppList != null) {
 			ProcessInfo info = mAppList.get(position);
-			removeProcessFromLis(info.getProcessName());
+			mAppList.remove(position);
+			removeProcessFromList(info);
+			TMLog.d(TAG, info.getProcessName());
 			info.killSelf(this);
-			sortList(mAppList);
+            if (mAppList.size() == 0) {
+                updateEmtpyView();
+                return;
+            }
 			mMaxMemory = mAppList.get(0).getMemory();
 			mAvailMemory += (float) info.getMemory() / 1024;
 			setMemBar();
@@ -303,7 +338,7 @@ public class TaskmanagerActivity extends ListActivity implements
 			values.put(Constants.PACKAGE_NAME, name);
 			try {
 				mContentResolver.insert(Constants.IGNORE_LIST_URI, values);
-				removeProcessFromLis(name);
+				removeProcessFromList(mAppList.get(pos));
 			} catch (SQLiteException e) {
 				e.printStackTrace();
 			}
@@ -333,25 +368,54 @@ public class TaskmanagerActivity extends ListActivity implements
 	    }
 	}
 
-	//Could not find the better way to do this.
-	private void removeProcessFromLis(String processName) {
-		for(ProcessInfo info : mAppListWithoutSystemProcess) {
-			if(TextUtils.equals(info.getProcessName(), processName)){
-				mAppListWithoutSystemProcess.remove(info);
-				break;
-			}
-		}
+	private void killAllUserProcess() {
+	    TMLog.begin(TAG);
+	    if (mAppList != null) {
+	        int count = mAppList.size();
+	        for(int i = 0;i < count;i++) {
+                if(count == 0) {
+                    break;
+                }
+	            ProcessInfo info = mAppList.get(i);
+	            if(!info.isSystemProcess()) {
+	                killProcess(i);
+	                i--;
+	                count--;
+	            }
+	        }
+	    }
+	    TMLog.end(TAG);
+	}
 
-		for(ProcessInfo info : mAppListAll) {
-			if(TextUtils.equals(info.getPackageName(), processName)){
-				mAppListAll.remove(info);
-				break;
-			}
-		}
+    // Could not find the better way to do this.
+    private void removeProcessFromList(ProcessInfo aInfo) {
+        String name = aInfo.getPackageName();
+        if (aInfo.isSystemProcess()) {
+            removeListWithName(name, mSystemProcess);
+        } else if(aInfo.isService()) {
+            removeListWithName(name, mServiceProcess);
+        } else {
+            removeListWithName(name, mNormalProcess);
+        }
+//		for(ProcessInfo info : mAppListAll) {
+//			if(TextUtils.equals(info.getProcessName(), processName)){
+//				mAppListAll.remove(info);
+//				break;
+//			}
+//		}
 		if (mAdapter != null) {
 			mAdapter.notifyDataSetChanged();
 		}
 	}
+
+    private void removeListWithName(String name, ArrayList<ProcessInfo> list) {
+        for (ProcessInfo info : list) {
+            if (TextUtils.equals(info.getProcessName(), name)) {
+                list.remove(info);
+                break;
+            }
+        }
+    }
 
 	private void switchToProcess(int position) {
 		if (mAppList != null) {
@@ -373,67 +437,6 @@ public class TaskmanagerActivity extends ListActivity implements
 		;
 		TMLog.end(TAG);
 	}
-
-	// public List<ProcessInfo> getRunningProcess() {
-	// long startTime = System.currentTimeMillis();
-	// List<RunningAppProcessInfo> run = mAm.getRunningAppProcesses();
-	// PackageManager pm = this.getPackageManager();
-	// List<ProcessInfo> list = new ArrayList<ProcessInfo>();
-	// for (RunningAppProcessInfo runningInfo : run) {
-	// if (runningInfo.processName.equals("system")
-	// || runningInfo.processName.equals("com.android.phone")) {
-	// continue;
-	// }
-	//
-	// String packageName = runningInfo.processName;
-	// ProcessInfo processInfo = new ProcessInfo(packageName);
-	// PackagesInfo allUsedPackage = new PackagesInfo(this);
-	// ApplicationInfo appInfo = allUsedPackage.getInfo(packageName);
-	// int pid = runningInfo.pid;
-	// if (appInfo != null) {
-	// processInfo.setIcon(mPm.getApplicationIcon(appInfo));
-	// processInfo.setName(appInfo.loadLabel(pm).toString());
-	// processInfo.setUid(runningInfo.uid);
-	// processInfo.setImportance(runningInfo.importance);
-	// processInfo.setPid(pid);
-	// processInfo.setSystemProcess((appInfo.flags &
-	// ApplicationInfo.FLAG_SYSTEM) != 0);
-	//
-	// // Poor performance here.
-	// MemoryInfo[] meminfo = mAm
-	// .getProcessMemoryInfo(new int[] { pid });
-	// MemoryInfo pInfo = meminfo[0];
-	// processInfo.setMemoryInfo(pInfo);
-	// processInfo.setMemory(pInfo.getTotalPss());
-	// TMLog.d(TAG, appInfo.loadLabel(pm).toString() + " UID: "
-	// + processInfo.getUid() + " PID " + processInfo.getPid()
-	// + "  System Process: " + processInfo.isSystemProcess()
-	// + " Process name: " + runningInfo.processName);
-	// // Log.i(TAG, "Pss Memeory ");
-	// // if (processInfo.Uid > USER_PROCESS_ID
-	// // && processInfo.importance
-	// // > RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE) {
-	// list.add(processInfo);
-	// }
-	// }
-	// List<RunningServiceInfo> listSerivce = mAm
-	// .getRunningServices(Integer.MAX_VALUE);
-	// for (RunningServiceInfo info : listSerivce) {
-	// TMLog.d(TAG,
-	// info.process
-	// + " UID: "
-	// + info.uid
-	// + "  PID: "
-	// + info.pid
-	// + (info.flags == RunningServiceInfo.FLAG_SYSTEM_PROCESS ?
-	// " >>>>SYSTEM PROCESS<<<<<<<"
-	// : " Not System Process"));
-	// }
-	// long lastTime = System.currentTimeMillis();
-	// TMLog.d(TAG, "last Time for getRunningProcess: " + (lastTime -
-	// startTime));
-	// return list;
-	// }
 
 	class AppItemAdapter extends BaseAdapter {
 
@@ -483,9 +486,18 @@ public class TaskmanagerActivity extends ListActivity implements
 					(float) appInfo.getMemory() / 1024));
 			int mem = appInfo.getMemory();
 			int pos = mem * 100 / mMaxMemory;
-			holder.mProgressBar.setProgress(pos);
+            holder.mProgressBar.setProgress(pos);
+            boolean isSystem = appInfo.isSystemProcess();
+            if (isSystem) {
+                holder.mTitle.setTextColor(Color.BLUE);
+            } else if (appInfo.getImportance()
+                    <= RunningAppProcessInfo.IMPORTANCE_SERVICE) {
+                holder.mTitle.setTextColor(Color.GREEN);
+            } else {
+                holder.mTitle.setTextColor(Color.BLACK);
+            }
 			convertView.setTag(R.id.app_summary,
-					Boolean.valueOf(appInfo.isSystemProcess()));
+					Boolean.valueOf(isSystem));
 			return convertView;
 		}
 	}
@@ -499,6 +511,11 @@ public class TaskmanagerActivity extends ListActivity implements
 				task.execute();
 			}
 			break;
+		case R.id.kill_all:
+		    if(!mOnRefresh) {
+		        killAllUserProcess();
+		    }
+		    break;
 		}
 	}
 
@@ -517,6 +534,32 @@ public class TaskmanagerActivity extends ListActivity implements
 	private void sortList(List<ProcessInfo> list) {
 		Collections.sort(list, ProcessInfo.getComparator());
 	}
+
+    private void filterAppList() {
+        if (mNormalProcess == null || mSystemProcess == null
+                || mServiceProcess == null) {
+            return;
+        }
+        mAppList = new ArrayList<ProcessInfo>();
+        if (Utils.isShowSystemProcess(TaskmanagerActivity.this)
+                && Utils.isShowService(TaskmanagerActivity.this)) {
+            mAppList.addAll(mNormalProcess);
+            mAppList.addAll(mSystemProcess);
+            mAppList.addAll(mServiceProcess);
+        } else if (Utils.isShowSystemProcess(TaskmanagerActivity.this)) {
+            mAppList.addAll(mNormalProcess);
+            mAppList.addAll(mSystemProcess);
+        } else if (Utils.isShowService(TaskmanagerActivity.this)) {
+            mAppList.addAll(mNormalProcess);
+            mAppList.addAll(mServiceProcess);
+        } else {
+            mAppList.addAll(mNormalProcess);
+        }
+        if (mAppList.size() != 0) {
+            sortList(mAppList);
+            mMaxMemory = mAppList.get(0).getMemory();
+        }
+    }
 
 	private void setMemBar() {
 		float used = (mTotalMemory - mAvailMemory);
@@ -551,24 +594,42 @@ public class TaskmanagerActivity extends ListActivity implements
 		protected List<ProcessInfo> doInBackground(Void... params) {
 			List<ProcessInfo> list = mRunningStatus.getRunningApplication();
 			sortList(list);
-			mAppListWithoutSystemProcess = new ArrayList<ProcessInfo>();
-			for (ProcessInfo info : list) {
-				if (!info.isSystemProcess()) {
-					mAppListWithoutSystemProcess.add(info);
-				}
-			}
-			return list;
-		}
+            mNormalProcess = new ArrayList<ProcessInfo>();
+            mServiceProcess = new ArrayList<ProcessInfo>();
+            mSystemProcess = new ArrayList<ProcessInfo>();
+            for (ProcessInfo info : list) {
+                if (info.isSystemProcess()) {
+                    mSystemProcess.add(info);
+                } else if (info.isService()) {
+                    mServiceProcess.add(info);
+                } else {
+                    mNormalProcess.add(info);
+                }
+            }
+            filterAppList();
+            return list;
+        }
 
 		@Override
 		protected void onPostExecute(List<ProcessInfo> list) {
-			mAppListAll = list;
-			if (Utils.isShowSystemProcess(TaskmanagerActivity.this)) {
-				mAppList = mAppListAll;
-			}else {
-				mAppList = mAppListWithoutSystemProcess;
-			}
-			mMaxMemory = mAppList.get(0).getMemory();
+//			mAppListAll = list;
+//		    mAppList = new ArrayList<ProcessInfo>();
+//            if (Utils.isShowSystemProcess(TaskmanagerActivity.this)
+//                    && Utils.isShowService(TaskmanagerActivity.this)) {
+//                mAppList.addAll(mNormalProcess);
+//                mAppList.addAll(mSystemProcess);
+//                mAppList.addAll(mServiceProcess);
+//            } else if (Utils.isShowSystemProcess(TaskmanagerActivity.this)) {
+//                mAppList.addAll(mNormalProcess);
+//                mAppList.addAll(mSystemProcess);
+//            } else if (Utils.isShowService(TaskmanagerActivity.this)) {
+//                mAppList.addAll(mNormalProcess);
+//                mAppList.addAll(mServiceProcess);
+//            } else {
+//                mAppList.addAll(mNormalProcess);
+//            }
+//            sortList(mAppList);
+//			mMaxMemory = mAppList.get(0).getMemory();
 			mAvailMemory = Utils.getLastestFreeMemory(mAm);
 			mOnRefresh = false;
 			setMemBar();
@@ -600,14 +661,17 @@ public class TaskmanagerActivity extends ListActivity implements
 				mAdapter.notifyDataSetChanged();
 			}
 			mRefreshButton.setEnabled(true);
+			mKillAllButton.setEnabled(true);
 			Toast.makeText(TaskmanagerActivity.this,
 					R.string.string_refresh_complete_txt, Toast.LENGTH_SHORT)
 					.show();
+            updateEmtpyView();
 		}
 
 		protected void onPreExecute() {
 			super.onPreExecute();
 			mRefreshButton.setEnabled(false);
+			mKillAllButton.setEnabled(false);
 			Toast.makeText(TaskmanagerActivity.this,
 					R.string.string_start_refresh_txt, Toast.LENGTH_SHORT)
 					.show();

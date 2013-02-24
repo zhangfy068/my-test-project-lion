@@ -56,26 +56,28 @@ public class RunningProcessStatus {
 		PackagesInfo packageInfo = new PackagesInfo(mContext);
 		// initialize the running application process
 		for (RunningAppProcessInfo info : runnings) {
-			TMLog.d(TAG, ">>>>>>" + info.processName + "<<<<<<");
 			ApplicationInfo appInfo = packageInfo.getInfo(info.processName);
 			if (appInfo != null && !isIgoreProcess(info.processName)) {
 				ProcessInfo processInfo = new ProcessInfo(info.processName);
 				processInfo.setAppInfo(appInfo);
 				processInfo.setRunningInfo(info);
-				processInfo.updateBasicInfo(mPm);
-				tmpAppProcesses.put(info.pid, processInfo);
-				runningProcess.add(processInfo);
-				TMLog.d(TAG, processInfo.getName(mPm) + " "
-						+ appInfo.packageName + " PID:" + processInfo.getPid());
-			}
+                processInfo.updateBasicInfo(mPm);
+                tmpAppProcesses.put(info.pid, processInfo);
+                runningProcess.add(processInfo);
+                if (!processInfo.isSystemProcess()) {
+                    TMLog.d(TAG, processInfo.getName(mPm) + " "
+                            + appInfo.processName + " Importance:"
+                            + processInfo.getImportance());
+                }
+            }
 
-		}
+        }
 
 		// find the running service for process
 		List<RunningServiceInfo> services = mAm
 				.getRunningServices(Integer.MAX_VALUE);
 		for (RunningServiceInfo service : services) {
-			TMLog.d(TAG, service.process + " PID:" + service.pid );
+//			TMLog.d(TAG, service.process + " PID:" + service.pid );
 			if (service.started && service.clientLabel != 0 && service.pid > 0) {
 				ProcessInfo processInfo = tmpAppProcesses.get(service.pid);
 				processInfo.addService(service);

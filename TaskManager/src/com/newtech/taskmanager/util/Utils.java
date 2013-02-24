@@ -65,6 +65,12 @@ public class Utils {
 		return sPref.getBoolean(Constants.SETTINGS_AUTO_RUN, true);
 	}
 
+	public static boolean isShowService(Context context) {
+	    SharedPreferences sPref = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        return sPref.getBoolean(Constants.SETTINGS_SHOW_SERVICE, true);
+	}
+
 	public static boolean isAutoKill(Context context) {
 		SharedPreferences sPref = PreferenceManager
 				.getDefaultSharedPreferences(context);
