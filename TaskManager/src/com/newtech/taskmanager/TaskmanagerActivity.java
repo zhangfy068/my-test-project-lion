@@ -225,9 +225,17 @@ public class TaskmanagerActivity extends ListActivity implements
 		if(mAppList.size() == 0) {
 		    return;
 		}
+
         ProcessInfo processInfo = mAppList.get(info.position);
-        aMenu.setHeaderIcon(processInfo.getIcon(mPm));
-        aMenu.setHeaderTitle(processInfo.getName(mPm));
+        LayoutInflater inflater = LayoutInflater.from(mActivity);
+        View menuHeader = inflater.inflate(R.layout.contextmenu_header, null);
+        ImageView icon = (ImageView) menuHeader.findViewById(R.id.contextmenu_icon);
+        TextView title = (TextView) menuHeader.findViewById(R.id.contextmenu_title);
+        icon.setImageDrawable(processInfo.getIcon(mPm));
+        title.setText(processInfo.getName(mPm));
+        aMenu.setHeaderView(menuHeader);
+        //aMenu.setHeaderIcon(processInfo.getIcon(mPm));
+        //aMenu.setHeaderTitle(processInfo.getName(mPm));
         aMenu.add(Menu.NONE, CONTEXT_MENU_KILL, 0,
                 R.string.string_context_menu_kill_txt);
         if (processInfo.getIntent() != null) {
