@@ -45,6 +45,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.ads.AdRequest;
+import com.google.ads.AdView;
 import com.newtech.taskmanager.util.Constants;
 import com.newtech.taskmanager.util.TMLog;
 import com.newtech.taskmanager.util.Utils;
@@ -106,7 +108,7 @@ public class TaskmanagerActivity extends ListActivity implements
 	private TextView mAvailMemTextView;
 
 	private boolean mOnRefresh;
-
+	private AdView mAdView;
 	private RunningProcessStatus mRunningStatus;
 
     private ContentResolver mContentResolver;
@@ -156,6 +158,9 @@ public class TaskmanagerActivity extends ListActivity implements
 		mSpinner.setAdapter(mSpinnerAdapter);
 	    mEmptyView= (TextView)findViewById(R.id.emptyText);
 		registerForContextMenu(getListView());
+
+		mAdView = (AdView)this.findViewById(R.id.adView);
+		mAdView.loadAd(new AdRequest());
 		initProcess();
 	}
 
@@ -165,6 +170,7 @@ public class TaskmanagerActivity extends ListActivity implements
 			mAdapter = null;
 		}
 		super.onDestroy();
+		mAdView.destroy();
 	}
 
     @Override
@@ -227,7 +233,7 @@ public class TaskmanagerActivity extends ListActivity implements
 		}
 
         ProcessInfo processInfo = mAppList.get(info.position);
-        LayoutInflater inflater = LayoutInflater.from(mActivity);
+        LayoutInflater inflater = LayoutInflater.from(this);
         View menuHeader = inflater.inflate(R.layout.contextmenu_header, null);
         ImageView icon = (ImageView) menuHeader.findViewById(R.id.contextmenu_icon);
         TextView title = (TextView) menuHeader.findViewById(R.id.contextmenu_title);
@@ -442,7 +448,6 @@ public class TaskmanagerActivity extends ListActivity implements
 		if (mAppList != null && mAdapter != null) {
 			mAdapter.notifyDataSetChanged();
 		}
-		;
 		TMLog.end(TAG);
 	}
 
@@ -680,6 +685,7 @@ public class TaskmanagerActivity extends ListActivity implements
 			super.onPreExecute();
 			mRefreshButton.setEnabled(false);
 			mKillAllButton.setEnabled(false);
+		    mAdView.loadAd(new AdRequest());
 			Toast.makeText(TaskmanagerActivity.this,
 					R.string.string_start_refresh_txt, Toast.LENGTH_SHORT)
 					.show();

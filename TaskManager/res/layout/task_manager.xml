@@ -7,36 +7,52 @@
  */
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
+
+    <com.google.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center"
+        ads:adSize="SMART_BANNER"
+        ads:adUnitId="a15135dcf7d2708"
+        ads:loadAdOnCreate="true" />
+
     <LinearLayout
-            android:id="@+id/loading_process"
-            android:layout_height="match_parent"
-            android:layout_width="wrap_content"
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:orientation="vertical">
+        android:id="@+id/loading_process"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/adView"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical" >
+
         <ProgressBar
-            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:focusable="false" />
 
         <TextView
             android:id="@+id/waiting_tips"
-            android:text="@string/refreshing_dialog_title"
-            android:layout_marginTop="@dimen/general_list_item_padding_top"
-            android:layout_gravity="center"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/general_list_item_padding_top"
+            android:text="@string/refreshing_dialog_title" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/header_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:layout_marginTop="@dimen/general_list_item_padding_top"
         android:orientation="horizontal"
         android:visibility="gone" >
@@ -52,70 +68,84 @@
         <Spinner
             android:id="@+id/spinner_filter"
             android:layout_width="0dip"
-            android:spinnerMode="dropdown"
             android:layout_height="wrap_content"
             android:layout_marginRight="@dimen/general_list_item_padding_left"
-            android:layout_weight="2" />
+            android:layout_weight="2"
+            android:spinnerMode="dropdown" />
 
         <Button
             android:id="@+id/kill_all"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
-            android:text="@string/string_btn_kill_all"
-            android:layout_weight="2" />
+            android:layout_weight="2"
+            android:text="@string/string_btn_kill_all" />
     </LinearLayout>
 
-    <view class="com.newtech.taskmanager.LinearColorBar"
-            android:id="@+id/color_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:clipChildren="false"
-            android:paddingLeft="@dimen/general_list_item_padding_left"
-            android:paddingRight="@dimen/general_list_item_padding_right"
-            android:clipToPadding="false"
-            android:paddingTop="1dp"
-            android:paddingBottom="1dp"
-            android:visibility="gone">
+    <view
+        android:id="@+id/color_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header_view"
+        class="com.newtech.taskmanager.LinearColorBar"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:paddingBottom="1dp"
+        android:paddingLeft="@dimen/general_list_item_padding_left"
+        android:paddingRight="@dimen/general_list_item_padding_right"
+        android:paddingTop="1dp"
+        android:visibility="gone" >
 
-         <TextView android:id="@+id/used_memory"
+        <TextView
+            android:id="@+id/used_memory"
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:focusable="false"
             android:gravity="start|bottom"
+            android:singleLine="true"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="#000"
-            android:singleLine="true" />
-         <TextView android:id="@+id/avail_memory"
-            android:layout_gravity="center_vertical|end"
+            android:textColor="#000" />
+
+        <TextView
+            android:id="@+id/avail_memory"
             android:layout_width="0px"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
             android:layout_weight="1"
             android:focusable="false"
             android:gravity="end|bottom"
+            android:singleLine="true"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="#000"
-            android:singleLine="true" />
+            android:textColor="#000" />
     </view>
     <!-- Here is the view to show if the list is emtpy -->
 
-    <TextView
-        android:id="@+id/emptyText"
-        style="?android:attr/textAppearanceMedium"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal|top"
-        android:paddingTop="@dimen/general_empty_txt_top_padding"
-        android:text="@string/string_list_empty"
-        android:visibility="gone" />
-
-    <ListView
-        android:id="@android:id/list"
+    <LinearLayout
+        android:id="@+id/process_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/general_list_item_padding_left"
-        android:paddingRight="@dimen/general_list_item_padding_right"
-        android:scrollbarStyle="outsideOverlay" />
+        android:layout_above="@id/adView"
+        android:layout_below="@id/color_bar"
+        android:orientation="vertical" >
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/emptyText"
+            style="?android:attr/textAppearanceMedium"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal|top"
+            android:paddingTop="@dimen/general_empty_txt_top_padding"
+            android:text="@string/string_list_empty"
+            android:visibility="gone" />
+
+        <ListView
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/general_list_item_padding_left"
+            android:paddingRight="@dimen/general_list_item_padding_right"
+            android:scrollbarStyle="outsideOverlay" />
+    </LinearLayout>
+
+</RelativeLayout>

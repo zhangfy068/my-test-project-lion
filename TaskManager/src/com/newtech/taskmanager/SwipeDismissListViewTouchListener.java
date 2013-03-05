@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.newtech.taskmanager.util.TMLog;
+
 /**
  * A {@link android.view.View.OnTouchListener} that makes the list items in a
  * {@link ListView} dismissable. {@link ListView} is given special treatment
@@ -239,7 +241,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 			if (Math.abs(deltaX) > mViewWidth / 2 && !mIsForbidSwipe) {
 				dismiss = true;
 				dismissRight = deltaX > 0;
-			} else if (mMinFlingVelocity <= velocityX
+			} else if (mMinFlingVelocity * 2 <= velocityX
 					&& velocityX <= mMaxFlingVelocity && velocityY < velocityX
 					&& !mIsForbidSwipe) {
 				dismiss = true;
@@ -265,6 +267,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 				mDownView.animate().translationX(0).alpha(1)
 						.setDuration(mAnimationTime).setListener(null);
 			}
+			mVelocityTracker.recycle();
 			mVelocityTracker = null;
 			mDownX = 0;
 			mDownView = null;

@@ -9,7 +9,7 @@ import com.newtech.taskmanager.util.Utils;
 import android.app.Application;
 import android.content.Intent;
 
-public class TaskManaerApplication extends Application {
+public class TaskManagerApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();

@@ -9,12 +9,16 @@
 
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 
     <application
+        android:name=".TaskManagerApplication"
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
-        android:theme="@style/AppTheme"
-        android:label="@string/app_name">
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
         <activity
             android:name=".TaskmanagerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -22,6 +26,7 @@
             android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -32,9 +37,13 @@
             android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.google.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <activity
             android:name=".CheckedListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -42,10 +51,10 @@
             android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".IgnoreListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -53,10 +62,10 @@
             android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".AutolistActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -64,28 +73,31 @@
             android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
         <!-- register service for auto killing -->
-        <service android:name=".TaskManagerService"
-                 android:exported="false"/>
+        <service
+            android:name=".TaskManagerService"
+            android:exported="false" />
 
         <!-- boot completed receiver -->
         <receiver android:name=".BootCompletedReceiver" >
-            <intent-filter >
+            <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
         <!-- register provider -->
-        <provider android:name="com.newtech.taskmanager.provider.TaskmanagerContentProvider"
-                  android:exported="false"
-                  android:authorities="com.newtech.taskmanager.provider"
-                  android:multiprocess="false"
-                  android:readPermission="com.newtech.taskmanager.permission.READ"
-                  android:writePermission="com.newtech.taskmanager.permission.WRITE" />
+        <provider
+            android:name="com.newtech.taskmanager.provider.TaskmanagerContentProvider"
+            android:authorities="com.newtech.taskmanager.provider"
+            android:exported="false"
+            android:multiprocess="false"
+            android:readPermission="com.newtech.taskmanager.permission.READ"
+            android:writePermission="com.newtech.taskmanager.permission.WRITE" />
     </application>
 
 </manifest>
