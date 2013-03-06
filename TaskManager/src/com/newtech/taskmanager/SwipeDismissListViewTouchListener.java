@@ -293,6 +293,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 						.setAction(MotionEvent.ACTION_CANCEL
 								| (motionEvent.getActionIndex() << MotionEvent.ACTION_POINTER_INDEX_SHIFT));
 				mListView.onTouchEvent(cancelEvent);
+				cancelEvent.recycle();
 			}
 
 			if (mSwiping) {

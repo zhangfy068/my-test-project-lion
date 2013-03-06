@@ -30,14 +30,12 @@ import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,7 +60,7 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private static final int CONTEXT_MENU_IGNORE = 2;
 
-	private static final int CONTEXT_MENU_AUTOKILL = 3;
+//	private static final int CONTEXT_MENU_AUTOKILL = 3;
 
     private static final int CONTEXT_MENU_DETAIL = 4;
 
@@ -74,7 +72,7 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	private ListView mListView;
 
-	private ArrayAdapter<?> mSpinnerAdapter;
+//	private ArrayAdapter<?> mSpinnerAdapter;
 
 	private List<ProcessInfo> mAppList;
 
@@ -85,8 +83,8 @@ public class TaskmanagerActivity extends ListActivity implements
 	private ArrayList<ProcessInfo> mServiceProcess;
     //All System Process
 	private ArrayList<ProcessInfo> mSystemProcess;
-	private Spinner mSpinner;
-
+//	private Spinner mSpinner;
+	private TextView mCountView;
 	private Button mRefreshButton;
 
 	private Button mKillAllButton;
@@ -144,18 +142,20 @@ public class TaskmanagerActivity extends ListActivity implements
 		mHeadView = this.findViewById(R.id.header_view);
 		// mHeadView = inflater.inflate(R.layout.header_view, null);
 		// mListView.addHeaderView(mHeadView);
-		mSpinner = (Spinner) this.findViewById(R.id.spinner_filter);
+//		mSpinner = (Spinner) this.findViewById(R.id.spinner_filter);
 		mRefreshButton = (Button) this.findViewById(R.id.refresh_btn);
 		mProcessView = this.findViewById(R.id.loading_process);
 		mRefreshButton.setOnClickListener(this);
 
         mKillAllButton = (Button) this.findViewById(R.id.kill_all);
         mKillAllButton.setOnClickListener(this);
-
-		mSpinnerAdapter = ArrayAdapter.createFromResource(this,
-				R.array.snipper_filter_arrays,
-				android.R.layout.simple_spinner_dropdown_item);
-		mSpinner.setAdapter(mSpinnerAdapter);
+//
+//		mSpinnerAdapter = ArrayAdapter.createFromResource(this,
+//				R.array.snipper_filter_arrays,
+//				android.R.layout.simple_spinner_dropdown_item);
+//
+		mCountView = (TextView)findViewById(R.id.process_count);
+//		mSpinner.setAdapter(mSpinnerAdapter);
 	    mEmptyView= (TextView)findViewById(R.id.emptyText);
 		registerForContextMenu(getListView());
 
@@ -166,6 +166,11 @@ public class TaskmanagerActivity extends ListActivity implements
 
 	@Override
 	public void onDestroy() {
+	    if (Utils.isAutoKill(this)) {
+            //when we leave from the main ui, we start the auto service agin.
+            Intent intent = new Intent(this, TaskManagerService.class);
+            startService(intent);
+        }
 		if (mAdapter != null) {
 			mAdapter = null;
 		}
@@ -199,6 +204,12 @@ public class TaskmanagerActivity extends ListActivity implements
             filterAppList();
             mAdapter.notifyDataSetChanged();
             updateEmtpyView();
+        }
+
+        if (Utils.isAutoKill(this)) {
+            //when we enter the main ui, we stop the auto service
+            Intent intent = new Intent(this, TaskManagerService.class);
+            stopService(intent);
         }
         // }
     }
@@ -250,8 +261,8 @@ public class TaskmanagerActivity extends ListActivity implements
         }
         aMenu.add(Menu.NONE, CONTEXT_MENU_IGNORE, 0,
                 R.string.string_context_menu_ingore);
-        aMenu.add(Menu.NONE, CONTEXT_MENU_AUTOKILL, 0,
-                R.string.string_context_menu_autokill);
+//        aMenu.add(Menu.NONE, CONTEXT_MENU_AUTOKILL, 0,
+//                R.string.string_context_menu_autokill);
         aMenu.add(Menu.NONE, CONTEXT_MENU_DETAIL, 0,
                 R.string.string_context_menu_detail);
     }
@@ -277,9 +288,9 @@ public class TaskmanagerActivity extends ListActivity implements
 		case CONTEXT_MENU_IGNORE:
 			ignoreProcess(pos);
 			break;
-		case CONTEXT_MENU_AUTOKILL:
-			addAutoProcess(pos);
-			break;
+//		case CONTEXT_MENU_AUTOKILL:
+//			addAutoProcess(pos);
+//			break;
 		case CONTEXT_MENU_DETAIL:
 		    showDetail(pos);
 		    break;
@@ -302,11 +313,11 @@ public class TaskmanagerActivity extends ListActivity implements
 			intentIgnore.setClass(this, IgnoreListActivity.class);
 			startActivity(intentIgnore);
 			break;
-		case R.id.show_autolist:
-			Intent intentAuto = new Intent(Intent.ACTION_VIEW);
-			intentAuto.setClass(this, AutolistActivity.class);
-			startActivity(intentAuto);
-			break;
+//		case R.id.show_autolist:
+//			Intent intentAuto = new Intent(Intent.ACTION_VIEW);
+//			intentAuto.setClass(this, AutolistActivity.class);
+//			startActivity(intentAuto);
+//			break;
 		default:
 			break;
 		}
@@ -359,18 +370,18 @@ public class TaskmanagerActivity extends ListActivity implements
 		}
 	}
 
-	private void addAutoProcess(int pos) {
-		if (mAppList != null) {
-			String name = mAppList.get(pos).getProcessName();
-			ContentValues values = new ContentValues();
-			values.put(Constants.PACKAGE_NAME, name);
-			try {
-				mContentResolver.insert(Constants.AUTO_LIST_URI, values);
-			} catch (SQLiteException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+//	private void addAutoProcess(int pos) {
+//		if (mAppList != null) {
+//			String name = mAppList.get(pos).getProcessName();
+//			ContentValues values = new ContentValues();
+//			values.put(Constants.PACKAGE_NAME, name);
+//			try {
+//				mContentResolver.insert(Constants.AUTO_LIST_URI, values);
+//			} catch (SQLiteException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//	}
 
 	private void showDetail(int pos) {
 	    if (mAppList != null) {
@@ -574,21 +585,27 @@ public class TaskmanagerActivity extends ListActivity implements
         }
     }
 
-	private void setMemBar() {
-		float used = (mTotalMemory - mAvailMemory);
+    private void setMemBar() {
+        float used = (mTotalMemory - mAvailMemory);
 
-		mColorBar.setRatios(used / mTotalMemory, 0, mAvailMemory / mTotalMemory);
+        mColorBar
+                .setRatios(used / mTotalMemory, 0, mAvailMemory / mTotalMemory);
 
-		String usedString = getResources().getString(
-				R.string.string_memory_used_txt)
-				+ String.format("%.2f MB", used);
+        String usedString = getResources().getString(
+                R.string.string_memory_used_txt)
+                + String.format("%.2f MB", used);
 
-		String availString = getResources().getString(
-				R.string.string_memory_avail_txt)
-				+ String.format("%.2f MB", mAvailMemory);
-		mUsedMemoryTextView.setText(usedString);
-		mAvailMemTextView.setText(availString);
-	}
+        String availString = getResources().getString(
+                R.string.string_memory_avail_txt)
+                + String.format("%.2f MB", mAvailMemory);
+        mUsedMemoryTextView.setText(usedString);
+        mAvailMemTextView.setText(availString);
+        if (mAppList != null) {
+            String count = String.format(
+                    getString(R.string.string_process_count), mAppList.size());
+            mCountView.setText(count);
+        }
+    }
 
 	static private class ViewHolder {
 		ImageView mIcon;
@@ -625,24 +642,6 @@ public class TaskmanagerActivity extends ListActivity implements
 
 		@Override
 		protected void onPostExecute(List<ProcessInfo> list) {
-//			mAppListAll = list;
-//		    mAppList = new ArrayList<ProcessInfo>();
-//            if (Utils.isShowSystemProcess(TaskmanagerActivity.this)
-//                    && Utils.isShowService(TaskmanagerActivity.this)) {
-//                mAppList.addAll(mNormalProcess);
-//                mAppList.addAll(mSystemProcess);
-//                mAppList.addAll(mServiceProcess);
-//            } else if (Utils.isShowSystemProcess(TaskmanagerActivity.this)) {
-//                mAppList.addAll(mNormalProcess);
-//                mAppList.addAll(mSystemProcess);
-//            } else if (Utils.isShowService(TaskmanagerActivity.this)) {
-//                mAppList.addAll(mNormalProcess);
-//                mAppList.addAll(mServiceProcess);
-//            } else {
-//                mAppList.addAll(mNormalProcess);
-//            }
-//            sortList(mAppList);
-//			mMaxMemory = mAppList.get(0).getMemory();
 			mAvailMemory = Utils.getLastestFreeMemory(mAm);
 			mOnRefresh = false;
 			setMemBar();

@@ -4,18 +4,15 @@
  */
 package com.newtech.taskmanager;
 
-import com.newtech.taskmanager.util.Utils;
-
 import android.app.Application;
-import android.content.Intent;
 
 public class TaskManagerApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		if (Utils.isAutoKill(this.getApplicationContext())) {
-			Intent intent = new Intent(this, TaskManagerService.class);
-			startService(intent);
-		}
+//		if (Utils.isAutoKill(this.getApplicationContext())) {
+//			Intent intent = new Intent(this, TaskManagerService.class);
+//			startService(intent);
+//		}
 	}
 }

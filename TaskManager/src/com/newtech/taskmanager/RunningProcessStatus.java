@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.os.Debug.MemoryInfo;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
 public class RunningProcessStatus {
@@ -54,10 +55,15 @@ public class RunningProcessStatus {
 		final SparseArray<ProcessInfo> tmpAppProcesses = new SparseArray<ProcessInfo>();
 		List<RunningAppProcessInfo> runnings = mAm.getRunningAppProcesses();
 		PackagesInfo packageInfo = new PackagesInfo(mContext);
+		boolean enableIgnore = Utils.isEnableIgnore(mContext);
 		// initialize the running application process
 		for (RunningAppProcessInfo info : runnings) {
 			ApplicationInfo appInfo = packageInfo.getInfo(info.processName);
-			if (appInfo != null && !isIgoreProcess(info.processName)) {
+			if (appInfo != null) {
+			    if( enableIgnore && isIgoreProcess(info.processName)) {
+			        //If enable ignore list and process is in ignore list
+			        continue;
+			    }
 				ProcessInfo processInfo = new ProcessInfo(info.processName);
 				processInfo.setAppInfo(appInfo);
 				processInfo.setRunningInfo(info);
@@ -116,7 +122,16 @@ public class RunningProcessStatus {
         List<RunningAppProcessInfo> runnings = mAm.getRunningAppProcesses();
         PackagesInfo packageInfo = new PackagesInfo(mContext);
         // initialize the running application process
+        boolean enableIgnore = Utils.isEnableIgnore(mContext);
         for (RunningAppProcessInfo info : runnings) {
+            //ignroe itself
+            if(TextUtils.equals(info.processName, "com.newtech.taskmanager")) {
+                continue;
+            }
+            if( enableIgnore && isIgoreProcess(info.processName)) {
+                //If enable ignore list and process is in ignore list
+                continue;
+            }
             ApplicationInfo appInfo = packageInfo.getInfo(info.processName);
             if (appInfo != null && !isIgoreProcess(info.processName)) {
                 ProcessInfo processInfo = new ProcessInfo(info.processName);

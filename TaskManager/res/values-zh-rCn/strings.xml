@@ -39,9 +39,15 @@
     <string name="settings_auto_kill_title">自动关闭后台进程</string>
     <string name="settings_auto_kill_summary">系统将自动关闭不再使用的后台进程</string>
 
+    <string name="settings_enable_ignore_title">启用忽略列表</string>
+    <string name="settings_enable_ignore_summary">当你启用忽落列表时，被添加到忽略列表中的进程不会显示在进程列表中，也不会被自动关闭</string>
+
+    <string name="settings_enable_notification_title">启用状态栏通知</string>
+    <string name="settings_enable_notification_summary">当启用状态栏通知时，如果自动内存清理完成后，你会得到通知</string>
+
     <string name="settings_operation_title">操作和视图</string>
     <string name="settings_show_system_switch_title">显示系统进程</string>
-    <string name="settings_show_system_swith_summary">将显示所有系统进程,系统进程的名字将以蓝色字体标示</string>
+    <string name="settings_show_system_swith_summary">将显示所有系统进程，系统进程的名字将以蓝色字体标示</string>
     <string name="settings_show_service_title">显示服务和前台进程</string>
     <string name="settings_show_service_summary">将显示所有服务进程和前台进程，这些进程的名字将使用绿色字体标示</string>
     <string name="settings_swip_kill_switch_title">开启滑动手势</string>
@@ -52,4 +58,8 @@
     <string name="strings_unmark_all_txt">取消标记</string>
     <string name="string_list_empty">列表为空</string>
     <string name="string_btn_kill_all">一键关闭</string>
+    <string name="string_process_count">进程数： %1$s</string>
+
+    <string name="string_nofitication_content">已经自动释放 %1$sMB 内存</string>
+    <string name="string_auto_kill_complete">内存自动清理已完成</string>
 </resources>

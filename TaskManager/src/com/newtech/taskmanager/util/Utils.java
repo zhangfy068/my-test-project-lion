@@ -77,6 +77,18 @@ public class Utils {
 		return sPref.getBoolean(Constants.SETTINGS_AUTO_KILL, true);
 	}
 
+    public static boolean isEnableIgnore(Context context) {
+        SharedPreferences sPref = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        return sPref.getBoolean(Constants.SETTINGS_ENABLE_IGNORE, true);
+    }
+
+    public static boolean isEnableNotification(Context context) {
+        SharedPreferences sPref = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        return sPref.getBoolean(Constants.SETTINGS_ENABLE_NOTIFICATION, true);
+    }
+
 	public static String[] getIgnoreProject() {
 		return PROJECT_SELECTION.clone();
 	}

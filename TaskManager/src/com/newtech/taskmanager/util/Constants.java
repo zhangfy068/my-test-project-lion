@@ -20,6 +20,8 @@ public class Constants {
 	public static final String SETTINGS_SHOW_SYSTEM_PROCESS = "show_system_process";
 	public static final String SETTINGS_SWIPE_ENABLE = "swipe_kill_enable";
 	public static final String SETTINGS_SHOW_SERVICE = "show_service";
+	public static final String SETTINGS_ENABLE_IGNORE = "enable_ignore";
+    public static final String SETTINGS_ENABLE_NOTIFICATION = "enable_notification";
 
 	public static final int USER_PROCESS_ID = 10000;
 

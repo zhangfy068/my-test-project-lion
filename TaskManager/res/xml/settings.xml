@@ -19,6 +19,21 @@
         android:title="@string/settings_auto_kill_title"
         android:summary="@string/settings_auto_kill_summary" />
 
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="enable_notification"
+        android:dependency="auto_kill"
+        android:persistent="true"
+        android:title="@string/settings_enable_notification_title"
+        android:summary="@string/settings_enable_notification_summary" />
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="enable_ignore"
+        android:persistent="true"
+        android:title="@string/settings_enable_ignore_title"
+        android:summary="@string/settings_enable_ignore_summary" />
+
     <!-- view configure -->
     <PreferenceCategory android:title="@string/settings_operation_title" />
 

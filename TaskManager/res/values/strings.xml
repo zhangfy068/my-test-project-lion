@@ -39,6 +39,12 @@
     <string name="settings_auto_kill_title">Enable Auto Kill</string>
     <string name="settings_auto_kill_summary">Application will kill the usless processes</string>
 
+    <string name="settings_enable_ignore_title">Enable Ignore List</string>
+    <string name="settings_enable_ignore_summary">If enable ignore list, the processes in ignore list will not be shown in process list nor killed by auto kill service</string>
+
+    <string name="settings_enable_notification_title">Enable Notification</string>
+    <string name="settings_enable_notification_summary">If enable notifcation, you will get notice when auto clear process is completed</string>
+
     <string name="settings_operation_title">Operatiton And View</string>
     <string name="settings_show_system_switch_title">Show system process</string>
     <string name="settings_show_system_swith_summary">Show all system processes. The System processes will show in Blue color</string>
@@ -52,4 +58,7 @@
     <string name="strings_unmark_all_txt">Unmark All</string>
     <string name="string_list_empty">List is empty</string>
     <string name="string_btn_kill_all">Kill All</string>
+    <string name="string_process_count">Count:  %1$s</string>
+    <string name="string_nofitication_content">Have release %1$s MB Memory</string>
+    <string name="string_auto_kill_complete">Auto clear proceses have been completed</string>
 </resources>
