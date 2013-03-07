@@ -23,6 +23,7 @@
 
     <!-- context menu in main view -->
     <string name="string_context_menu_kill_txt">关闭程序</string>
+    <string name="string_context_menu_force_kill_text">尝试强制关闭</string>
     <string name="string_context_menu_switchto">跳转到此程序</string>
     <string name="string_context_menu_ingore">忽略此进程</string>
     <string name="string_context_menu_autokill">自动关闭此进程</string>
@@ -52,6 +53,9 @@
     <string name="settings_show_service_summary">将显示所有服务进程和前台进程，这些进程的名字将使用绿色字体标示</string>
     <string name="settings_swip_kill_switch_title">开启滑动手势</string>
     <string name="settings_swip_kill_switch_summary">在进程列表中可以通过滑动进程项以关闭进程</string>
+
+    <string name="settings_click_kill_title">开启点击关闭进程</string>
+    <string name="settings_click_kill_summary">如果你禁止该功能，你可以通过在某进程上长按呼叫出菜单来关闭它</string>
 
     <string name="strings_delete_txt">删除</string>
     <string name="strings_mark_all_txt">全部标记</string>

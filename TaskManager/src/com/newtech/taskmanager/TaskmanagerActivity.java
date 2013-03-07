@@ -7,6 +7,7 @@ package com.newtech.taskmanager;
 
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.app.ActivityManager;
@@ -192,18 +193,12 @@ public class TaskmanagerActivity extends ListActivity implements
         }
 
         if (mAdapter != null) {
-            // && mAppListAll != null) {
-            // if (Utils.isShowSystemProcess(this.getApplicationContext())) {
-            // mAppList = mAppListAll;
-            // } else {
-            // mAppList = mNormalProcess;
-            // }
-            // if (mAppList.size() > 0) {
-            // mMaxMemory = mAppList.get(0).getMemory();
-            // }
             filterAppList();
             mAdapter.notifyDataSetChanged();
             updateEmtpyView();
+            String count = String.format(
+                    getString(R.string.string_process_count), mAppList.size());
+            mCountView.setText(count);
         }
 
         if (Utils.isAutoKill(this)) {
@@ -251,10 +246,18 @@ public class TaskmanagerActivity extends ListActivity implements
         icon.setImageDrawable(processInfo.getIcon(mPm));
         title.setText(processInfo.getName(mPm));
         aMenu.setHeaderView(menuHeader);
-        //aMenu.setHeaderIcon(processInfo.getIcon(mPm));
-        //aMenu.setHeaderTitle(processInfo.getName(mPm));
-        aMenu.add(Menu.NONE, CONTEXT_MENU_KILL, 0,
-                R.string.string_context_menu_kill_txt);
+        if (Build.VERSION.SDK_INT < 11) {
+            menuHeader.setBackgroundColor(Color.GRAY);
+        }
+        // aMenu.setHeaderIcon(processInfo.getIcon(mPm));
+        // aMenu.setHeaderTitle(processInfo.getName(mPm));
+        if (!processInfo.isSystemProcess()) {
+            aMenu.add(Menu.NONE, CONTEXT_MENU_KILL, 0,
+                    R.string.string_context_menu_kill_txt);
+        } else {
+            aMenu.add(Menu.NONE, CONTEXT_MENU_KILL, 0,
+                    R.string.string_context_menu_force_kill_text);
+        }
         if (processInfo.getIntent() != null) {
             aMenu.add(Menu.NONE, CONTEXT_MENU_SWICHTO, 0,
                     R.string.string_context_menu_switchto);
@@ -342,14 +345,14 @@ public class TaskmanagerActivity extends ListActivity implements
 			removeProcessFromList(info);
 			TMLog.d(TAG, info.getProcessName());
 			info.killSelf(this);
+		    mAvailMemory += (float) info.getMemory() / 1024;
+	        setMemBar();
+
             if (mAppList.size() == 0) {
                 updateEmtpyView();
                 return;
             }
 			mMaxMemory = mAppList.get(0).getMemory();
-			mAvailMemory += (float) info.getMemory() / 1024;
-			setMemBar();
-
 			TMLog.d(TAG,
 					"Kill process, release memory :"
 							+ (float) (info.getMemory() / 1024) + "MB");
@@ -393,24 +396,25 @@ public class TaskmanagerActivity extends ListActivity implements
 	    }
 	}
 
-	private void killAllUserProcess() {
-	    TMLog.begin(TAG);
-	    if (mAppList != null) {
-	        int count = mAppList.size();
-	        for(int i = 0;i < count;i++) {
-                if(count == 0) {
+    private void killAllUserProcess() {
+        TMLog.begin(TAG);
+        if (mAppList != null) {
+            int count = mAppList.size();
+            for (int i = 0; i < count; i++) {
+                if (count == 0) {
                     break;
                 }
-	            ProcessInfo info = mAppList.get(i);
-	            if(!info.isSystemProcess()) {
-	                killProcess(i);
-	                i--;
-	                count--;
-	            }
-	        }
-	    }
-	    TMLog.end(TAG);
-	}
+                ProcessInfo info = mAppList.get(i);
+                if (!info.isSystemProcess()
+                        && info.getImportance() != RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    killProcess(i);
+                    i--;
+                    count--;
+                }
+            }
+        }
+        TMLog.end(TAG);
+    }
 
     // Could not find the better way to do this.
     private void removeProcessFromList(ProcessInfo aInfo) {
@@ -507,24 +511,23 @@ public class TaskmanagerActivity extends ListActivity implements
 			holder.mIcon.setImageDrawable(appInfo.getIcon(mPm));
 			holder.mTitle.setText(appInfo.getName(mPm));
 			holder.mSummary.setText(String.format("%.2f MB",
-					(float) appInfo.getMemory() / 1024));
-			int mem = appInfo.getMemory();
-			int pos = mem * 100 / mMaxMemory;
+                    (float) appInfo.getMemory() / 1024));
+            int mem = appInfo.getMemory();
+            int pos = mem * 100 / mMaxMemory;
             holder.mProgressBar.setProgress(pos);
-            boolean isSystem = appInfo.isSystemProcess();
-            if (isSystem) {
+            boolean isSystem = appInfo.isSystemProcess()
+                    || (appInfo.getImportance() == RunningAppProcessInfo.IMPORTANCE_FOREGROUND);
+            if (appInfo.isSystemProcess()) {
                 holder.mTitle.setTextColor(Color.BLUE);
-            } else if (appInfo.getImportance()
-                    <= RunningAppProcessInfo.IMPORTANCE_SERVICE) {
+            } else if (appInfo.getImportance() <= RunningAppProcessInfo.IMPORTANCE_SERVICE) {
                 holder.mTitle.setTextColor(Color.GREEN);
             } else {
                 holder.mTitle.setTextColor(Color.BLACK);
             }
-			convertView.setTag(R.id.app_summary,
-					Boolean.valueOf(isSystem));
-			return convertView;
-		}
-	}
+            convertView.setTag(R.id.app_summary, Boolean.valueOf(isSystem));
+            return convertView;
+        }
+    }
 
 	@Override
 	public void onClick(View v) {
@@ -543,17 +546,25 @@ public class TaskmanagerActivity extends ListActivity implements
 		}
 	}
 
-	@Override
-	public void onItemClick(AdapterView<?> arg0, View view, int position,
-			long id) {
-		// if (view != null) {
-		// ProcessInfo info = mAppList.get(position - 1);
-		// Intent intent = mPm.getLaunchIntentForPackage(info.packagename);
-		// if (intent != null) {
-		// startActivity(intent);
-		// }
-		// }
-	}
+    @Override
+    public void onItemClick(AdapterView<?> arg0, View view, int position,
+            long id) {
+        if (view != null) {
+            if (Build.VERSION.SDK_INT >= 11) {
+                if (Utils.isSupportSwipe(this)) {
+                    return;
+                }
+            }
+
+            if (Utils.isClickToKill(this)) {
+                ProcessInfo appInfo = (ProcessInfo) mAppList.get(position);
+                if (!appInfo.isSystemProcess()
+                        && appInfo.getImportance() != RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    killProcess(position);
+                }
+            }
+        }
+    }
 
 	private void sortList(List<ProcessInfo> list) {
 		Collections.sort(list, ProcessInfo.getComparator());
@@ -684,7 +695,6 @@ public class TaskmanagerActivity extends ListActivity implements
 			super.onPreExecute();
 			mRefreshButton.setEnabled(false);
 			mKillAllButton.setEnabled(false);
-		    mAdView.loadAd(new AdRequest());
 			Toast.makeText(TaskmanagerActivity.this,
 					R.string.string_start_refresh_txt, Toast.LENGTH_SHORT)
 					.show();

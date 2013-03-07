@@ -18,6 +18,9 @@ public class SystemProcess {
         if(sSystemList.contains(applicationName)) {
             return true;
         }
+        if(applicationName.contains("home")) {
+            return true;
+        }
         return false;
     }
     
@@ -26,15 +29,15 @@ public class SystemProcess {
         sSystemList.add("com.android.phone");
         sSystemList.add("system");
         sSystemList.add("android.process.acore");
-        sSystemList.add("com.android.settings");
+//        sSystemList.add("com.android.settings");
         sSystemList.add("com.android.systemui");
         sSystemList.add("android.process.media");
 //        sSystemList.add("com.android.mms");
         sSystemList.add("com.android.voicedialer");
         sSystemList.add("com.android.nfc");
         sSystemList.add("com.android.nfc3");
-        sSystemList.add("com.android.alarmclock");
-        sSystemList.add("com.android.deskclock");
+//        sSystemList.add("com.android.alarmclock");
+//        sSystemList.add("com.android.deskclock");
         sSystemList.add("com.google.android.deskclock");
         sSystemList.add("com.htc.android.worldclock");
         sSystemList.add("com.htc.widget.clockwidget");
@@ -134,5 +137,10 @@ public class SystemProcess {
         sSystemList.add("com.sonyericsson.dlna");
         //Google Service Framework
         sSystemList.add("com.google.process.gapps");
+        //old home screen for sonyericsson phone
+        sSystemList.add("com.sonyericsson.homescreen");
+        //seems samsungs's phone homescreen
+        sSystemList.add("com.sec.android.app.twlauncher");
+        sSystemList.add("com.android.launcher");
     }
 }

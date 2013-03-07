@@ -22,6 +22,7 @@ public class Constants {
 	public static final String SETTINGS_SHOW_SERVICE = "show_service";
 	public static final String SETTINGS_ENABLE_IGNORE = "enable_ignore";
     public static final String SETTINGS_ENABLE_NOTIFICATION = "enable_notification";
+    public static final String SETTINGS_CLICK_TO_KILL = "click_kill";
 
 	public static final int USER_PROCESS_ID = 10000;
 

@@ -63,20 +63,17 @@ public class RunningProcessStatus {
 			    if( enableIgnore && isIgoreProcess(info.processName)) {
 			        //If enable ignore list and process is in ignore list
 			        continue;
-			    }
-				ProcessInfo processInfo = new ProcessInfo(info.processName);
-				processInfo.setAppInfo(appInfo);
-				processInfo.setRunningInfo(info);
+                }
+                ProcessInfo processInfo = new ProcessInfo(info.processName);
+                processInfo.setAppInfo(appInfo);
+                processInfo.setRunningInfo(info);
                 processInfo.updateBasicInfo(mPm);
                 tmpAppProcesses.put(info.pid, processInfo);
                 runningProcess.add(processInfo);
-                if (!processInfo.isSystemProcess()) {
-                    TMLog.d(TAG, processInfo.getName(mPm) + " "
-                            + appInfo.processName + " Importance:"
-                            + processInfo.getImportance());
-                }
+                TMLog.d(TAG,
+                        processInfo.getName(mPm) + " " + appInfo.processName
+                                + " Importance:" + processInfo.getImportance());
             }
-
         }
 
 		// find the running service for process

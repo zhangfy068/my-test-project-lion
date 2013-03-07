@@ -25,7 +25,7 @@
     <string name="string_context_menu_kill_txt">Kill</string>
     <string name="string_context_menu_switchto">Switch To</string>
     <string name="string_context_menu_ingore">Ignore it</string>
-    <string name="string_context_menu_autokill">Auto kill it</string>
+<!--     <string name="string_context_menu_autokill">Auto kill it</string> -->
     <string name="string_context_menu_detail">Details</string>
 
     <string name="string_memory_used_txt">Used:</string>
@@ -52,6 +52,9 @@
     <string name="settings_show_service_summary">Show all serivces and foreground processes. These processes will show in Green color</string>
     <string name="settings_swip_kill_switch_title">Enable swipe</string>
     <string name="settings_swip_kill_switch_summary">Enable swipe to kill process in process list</string>
+
+    <string name="settings_click_kill_title">Click process to kill</string>
+    <string name="settings_click_kill_summary">If you have forbitten it, you can long-process to call context menu to kill it</string>
 
     <string name="strings_delete_txt">Delete</string>
     <string name="strings_mark_all_txt">Mark All</string>

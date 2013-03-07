@@ -89,6 +89,12 @@ public class Utils {
         return sPref.getBoolean(Constants.SETTINGS_ENABLE_NOTIFICATION, true);
     }
 
+    public static boolean isClickToKill(Context context) {
+        SharedPreferences sPref = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        return sPref.getBoolean(Constants.SETTINGS_CLICK_TO_KILL, true);
+    }
+
 	public static String[] getIgnoreProject() {
 		return PROJECT_SELECTION.clone();
 	}

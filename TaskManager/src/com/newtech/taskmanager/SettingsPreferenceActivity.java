@@ -27,8 +27,13 @@ public class SettingsPreferenceActivity extends PreferenceActivity {
 				.findPreference(Constants.SETTINGS_AUTO_KILL);
 		CheckBoxPreference swipeEnabler = (CheckBoxPreference) this
                 .findPreference(Constants.SETTINGS_SWIPE_ENABLE);
+		final CheckBoxPreference clickKillEnabler = (CheckBoxPreference) this
+		        .findPreference(Constants.SETTINGS_CLICK_TO_KILL);
         if(Build.VERSION.SDK_INT < 11 ) {
             swipeEnabler.setEnabled(false);
+        }
+        if(swipeEnabler.isEnabled()) {
+            clickKillEnabler.setEnabled(false);
         }
 		autoKill.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 			@Override
@@ -47,6 +52,22 @@ public class SettingsPreferenceActivity extends PreferenceActivity {
 				return true;
 			}
 
+		});
+
+		swipeEnabler.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference,
+                    Object newValue) {
+                if (newValue instanceof Boolean) {
+                    boolean isEnableSwipe = (Boolean) newValue;
+                    if(isEnableSwipe) {
+                        clickKillEnabler.setEnabled(false);
+                    } else {
+                        clickKillEnabler.setEnabled(true);
+                    }
+                }
+                return true;
+            }
 		});
 	}
 }

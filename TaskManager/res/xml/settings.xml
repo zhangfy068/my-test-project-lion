@@ -44,7 +44,7 @@
         android:title="@string/settings_show_system_switch_title"
         android:summary="@string/settings_show_system_swith_summary" />
 
-    <CheckBoxPreference
+     <CheckBoxPreference
         android:defaultValue="true"
         android:key="show_service"
         android:persistent="true"
@@ -58,4 +58,10 @@
         android:title="@string/settings_swip_kill_switch_title"
         android:summary="@string/settings_swip_kill_switch_summary" />
 
+     <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="click_kill"
+        android:persistent="true"
+        android:title="@string/settings_click_kill_title"
+        android:summary="@string/settings_click_kill_summary" />
 </PreferenceScreen>
