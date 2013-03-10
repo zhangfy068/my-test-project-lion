@@ -12,18 +12,20 @@ public class SystemProcess {
     private static ArrayList<String> sSystemList;
 
     public static boolean isSystemList(String applicationName) {
-        if(sSystemList == null ) {
+        if (sSystemList == null) {
             initList();
         }
-        if(sSystemList.contains(applicationName)) {
+        if (sSystemList.contains(applicationName)) {
             return true;
         }
-        if(applicationName.contains("home")) {
+        if (applicationName.contains("home")
+                || applicationName.contains("inputmethod")
+                || applicationName.contains("keyboard")) {
             return true;
         }
         return false;
     }
-    
+
     private static void initList() {
         sSystemList = new ArrayList<String>();
         sSystemList.add("com.android.phone");
@@ -142,5 +144,8 @@ public class SystemProcess {
         //seems samsungs's phone homescreen
         sSystemList.add("com.sec.android.app.twlauncher");
         sSystemList.add("com.android.launcher");
+        sSystemList.add("com.google.android.gsf.login");
+        sSystemList.add("com.sonymobile.providers.ctlandownerprovider");
+        sSystemList.add("com.sonyericsson.textinput.uxp");
     }
 }

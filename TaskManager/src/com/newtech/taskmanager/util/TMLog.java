@@ -15,12 +15,12 @@ public final class TMLog {
     public static final boolean LOGE = true;
 
     /** log filter warn. */
-    public static final boolean LOGW = true;
+    public static final boolean LOGW = false;
 
     /** log filter info. */
     public static final boolean LOGI = false;
     /** log filter debug. */
-    public static final boolean LOGD = true;
+    public static final boolean LOGD = false;
     /** log filter verbose. */
     public static final boolean LOGV = false;
 

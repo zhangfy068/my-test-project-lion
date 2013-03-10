@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (C) 2013 XXXX XXXXXXXXXX.
+ * All rights, including trade secret rights, reserved.
+ *
+ */
+-->
+<resources>
+
+    <string name="app_name">任務管理器</string>
+    <!-- option menu -->
+    <string name="menu_show_ignorelist">顯示忽略列表</string>
+    <string name="menu_show_autolist">顯示自動關閉列表</string>
+    <string name="menu_settings">設定</string>
+    <string name="title_activity_taskmanager">任務管理器</string>
+    <string name="refreshing_dialog_title">請稍等</string>
+    <string name="string_refresh_btn_txt">刷新</string>
+    <string name="string_memory_status">內存占用狀態</string>
+    <string name="string_cpu_status">CPU使用狀態</string>
+    <string name="string_start_refresh_txt">開始刷新</string>
+    <string name="string_refresh_complete_txt">刷新完成!</string>
+
+    <!-- context menu in main view -->
+    <string name="string_context_menu_kill_txt">關閉程序</string>
+    <string name="string_context_menu_force_kill_text">嘗試強制關閉</string>
+    <string name="string_context_menu_switchto">跳轉到此程序</string>
+    <string name="string_context_menu_ingore">忽略此進程</string>
+    <string name="string_context_menu_autokill">自動關閉此進程</string>
+    <string name="string_context_menu_detail">查看應用詳細信息</string>
+
+    <string name="string_memory_used_txt">已用內存:</string>
+    <string name="string_memory_avail_txt">可用內存:</string>
+
+    <!-- settings strings -->
+    <string name="settings_system_configure">系統設定</string>
+    <string name="settings_auto_run_title">開機自動啟動</string>
+    <string name="settings_auto_run_summary">系統將在手機啟動後自動運行</string>
+
+    <string name="settings_auto_kill_title">自動關閉後臺進程</string>
+    <string name="settings_auto_kill_summary">系統將自動關閉不再使用的後臺進程</string>
+
+    <string name="settings_enable_ignore_title">啟用忽略列表</string>
+    <string name="settings_enable_ignore_summary">當你啟用忽落列表時，被添加到忽略列表中的進程不會顯示在進程列表中，也不會被自動關閉</string>
+
+    <string name="settings_enable_notification_title">啟用狀態欄通知</string>
+    <string name="settings_enable_notification_summary">當啟用狀態欄通知時，如果自動內存清理完成後，你會得到通知</string>
+
+    <string name="settings_operation_title">操作和視圖</string>
+    <string name="settings_show_system_switch_title">顯示系統進程</string>
+    <string name="settings_show_system_swith_summary">將顯示所有系統進程，系統進程的名字將以藍色字體標識</string>
+    <string name="settings_show_service_title">顯示服務和前臺進程</string>
+    <string name="settings_show_service_summary">將顯示所有服務進程和前臺進程，這些進程的名字將使用綠色字體標識</string>
+    <string name="settings_swip_kill_switch_title">開啟滑動手勢</string>
+    <string name="settings_swip_kill_switch_summary">在進程列表中可以通過滑動進程項以關閉進程</string>
+
+    <string name="settings_click_kill_title">開啟點擊關閉進程</string>
+    <string name="settings_click_kill_summary">如果你禁止該功能，你可以通過在某進程上長按呼叫出菜單來關閉它</string>
+    <string name="strings_delete_txt">刪除</string>
+    <string name="strings_mark_all_txt">全部標記</string>
+    <string name="strings_unmark_all_txt">取消標記</string>
+    <string name="string_list_empty">列表為空</string>
+    <string name="string_btn_kill_all">一鍵關閉</string>
+    <string name="string_process_count">進程數： %1$s</string>
+
+    <string name="string_nofitication_content">已經自動釋放 %1$sMB 內存</string>
+    <string name="string_auto_kill_complete">內存自動清理已完成</string>
+</resources>

@@ -165,19 +165,14 @@ public class TaskmanagerActivity extends ListActivity implements
 		initProcess();
 	}
 
-	@Override
-	public void onDestroy() {
-	    if (Utils.isAutoKill(this)) {
-            //when we leave from the main ui, we start the auto service agin.
-            Intent intent = new Intent(this, TaskManagerService.class);
-            startService(intent);
+    @Override
+    public void onDestroy() {
+        if (mAdapter != null) {
+            mAdapter = null;
         }
-		if (mAdapter != null) {
-			mAdapter = null;
-		}
-		super.onDestroy();
-		mAdView.destroy();
-	}
+        super.onDestroy();
+        mAdView.destroy();
+    }
 
     @Override
     public void onResume() {
@@ -200,13 +195,6 @@ public class TaskmanagerActivity extends ListActivity implements
                     getString(R.string.string_process_count), mAppList.size());
             mCountView.setText(count);
         }
-
-        if (Utils.isAutoKill(this)) {
-            //when we enter the main ui, we stop the auto service
-            Intent intent = new Intent(this, TaskManagerService.class);
-            stopService(intent);
-        }
-        // }
     }
 
 	private void initProcess() {
@@ -426,12 +414,6 @@ public class TaskmanagerActivity extends ListActivity implements
         } else {
             removeListWithName(name, mNormalProcess);
         }
-//		for(ProcessInfo info : mAppListAll) {
-//			if(TextUtils.equals(info.getProcessName(), processName)){
-//				mAppListAll.remove(info);
-//				break;
-//			}
-//		}
 		if (mAdapter != null) {
 			mAdapter.notifyDataSetChanged();
 		}
@@ -601,14 +583,14 @@ public class TaskmanagerActivity extends ListActivity implements
 
         mColorBar
                 .setRatios(used / mTotalMemory, 0, mAvailMemory / mTotalMemory);
-
+        float percent = (used / mTotalMemory)*100;
         String usedString = getResources().getString(
                 R.string.string_memory_used_txt)
-                + String.format("%.2f MB", used);
+                + String.format("%d MB(%d%%)", (int)used, (int)percent);
 
         String availString = getResources().getString(
                 R.string.string_memory_avail_txt)
-                + String.format("%.2f MB", mAvailMemory);
+                + String.format("%d MB", (int)mAvailMemory);
         mUsedMemoryTextView.setText(usedString);
         mAvailMemTextView.setText(availString);
         if (mAppList != null) {

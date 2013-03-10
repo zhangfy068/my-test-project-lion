@@ -36,7 +36,7 @@ public class TaskManagerService extends Service {
     private static final String RELEASE_MEMORY = "release_memeory";
     private Handler mHandler;
 
-    private static long INTERVAL = 30 * 1000;
+    private static long INTERVAL = 60 * 1000 * 3;
     private static int MEMORY_LEVEL = 50;
 
     private List<ProcessInfo> mAppListAll;
@@ -101,7 +101,6 @@ public class TaskManagerService extends Service {
     }
 
     private synchronized void killProcesses() {
-        // At first, all EMPTY PROCESS will be killed.
         TMLog.begin(TAG);
         int count = mAppListAll.size();
         for (int i = 0; i < count; i++) {
@@ -114,17 +113,17 @@ public class TaskManagerService extends Service {
                 count--;
             }
         }
-        if (getPercentAgeOfAvailMemory() < MEMORY_LEVEL) {
-            count = mAppListAll.size();
-            for (int i = 0; i < count; i++) {
-                ProcessInfo process = mAppListAll.get(i);
-                process.killSelf(this);
-                TMLog.d(TAG, "Kill Process:" + process.getProcessName());
-                mAppListAll.remove(i);
-                i--;
-                count--;
-            }
-        }
+//        if (getPercentAgeOfAvailMemory() < MEMORY_LEVEL) {
+//            count = mAppListAll.size();
+//            for (int i = 0; i < count; i++) {
+//                ProcessInfo process = mAppListAll.get(i);
+//                process.killSelf(this);
+//                TMLog.d(TAG, "Kill Process:" + process.getProcessName());
+//                mAppListAll.remove(i);
+//                i--;
+//                count--;
+//            }
+//        }
     }
 
     @SuppressWarnings("deprecation")
